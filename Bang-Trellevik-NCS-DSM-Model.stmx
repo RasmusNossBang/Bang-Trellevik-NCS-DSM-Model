@@ -1,0 +1,2682 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:isee="http://iseesystems.com/XMILE">
+	<header>
+		<smile version="1.0" namespace="std, isee"/>
+		<name>Model_2106</name>
+		<uuid>60ef3290-4afe-401c-944c-6514a8f41b5c</uuid>
+		<vendor>isee systems, inc.</vendor>
+		<product version="2.1.4" isee:build_number="2489" isee:saved_by_v1="true" lang="en">Stella Architect</product>
+	</header>
+	<sim_specs isee:sim_duration="0" isee:simulation_delay="0" isee:restore_on_start="false" method="Euler" time_units="Years" isee:instantaneous_flows="false" isee:loop_scores="false" isee:loop_exhaustive_allowed="1000">
+		<start>0</start>
+		<stop>60</stop>
+		<dt reciprocal="true">1000</dt>
+	</sim_specs>
+	<isee:prefs show_module_prefix="true" live_update_on_drag="true" show_restore_buttons="false" layer="model" interface_scale_ui="true" interface_max_page_width="10000" interface_max_page_height="10000" interface_min_page_width="0" interface_min_page_height="0" rerun_on_structure_change="false" saved_runs="5" keep="true" rifp="true"/>
+	<isee:multiplayer_settings include_chat="true" allow_observers="false" advance_time_increment="1" max_advance_time_in_ms="0" observer_start_page="home_page" enabled="false"/>
+	<isee:time_formats default_format="Builtin">
+		<isee:time_format name="Builtin" type="adaptive"/>
+	</isee:time_formats>
+	<default_format/>
+	<isee:sensi_specs_list active_index="0">
+		<isee:sensi_specs name="Sensitivity" method="sobol_sequence" runs="10">
+			<isee:variable type="uniform" min="0" max="10000" seed="12345" name="SEED_OCCURENCE" num_samples="5"/>
+			<isee:variable type="uniform" min="0" max="10000" name="SEED_CORING" num_samples="5"/>
+			<isee:variable type="uniform" min="0" max="10000" name="SEED_REGIONAL_SURVEY" num_samples="5"/>
+			<isee:variable type="uniform" min="0" max="10000" name='"SEED_HI-RES_SURVEY"' num_samples="5"/>
+		</isee:sensi_specs>
+	</isee:sensi_specs_list>
+	<isee:optimizer_specs_list active_index="0" log_to_disk="true">
+		<isee:optimizer_specs name="Optimization" method="Powell" additional_starts="0" report_interval="1" confidence_range="0">
+			<isee:parameter name='"DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK"' min="0" max="1"/>
+			<isee:parameter name="DESIRED_SHARE_OF_TOTAL_CORING_AREA_COVERED_BY_CORING_PER_YEAR" min="0" max="1"/>
+			<isee:parameter name='"DESIRED_SHARE_OF_TOTAL_HI-RES_AREA_COVERED_BY_HI-RES_PER_YEAR"' min="0" max="1"/>
+			<isee:parameter name="DESIRED_SHARE_OF_TOTAL_EIA_AREA_COVERED_BY_EIA_PER_YEAR" min="0" max="1"/>
+			<isee:parameter name="DESIRED_SHARE_OF_TOTAL_REGIONAL_SURVEY_AREA_COVERED_BY_REGIONAL_SURVEY_PER_YEAR" min="0" max="1"/>
+			<isee:payoff name="Payoff" action="max"/>
+		</isee:optimizer_specs>
+	</isee:optimizer_specs_list>
+	<isee:payoff_specs_list>
+		<isee:payoff_specs name="Payoff">
+			<isee:payoff_element name="DISCOUNTED_PROFITS" weight="1">
+				<isee:time_range type="terminal_value"/>
+			</isee:payoff_element>
+		</isee:payoff_specs>
+	</isee:payoff_specs_list>
+	<model_units>
+		<unit name="Kilometers">
+			<eqn/>
+			<alias>km</alias>
+			<alias>kilometer</alias>
+		</unit>
+		<unit name="Tons">
+			<eqn/>
+			<alias>ton</alias>
+		</unit>
+		<unit name="US Dollars">
+			<eqn/>
+			<alias>USD</alias>
+			<alias>$</alias>
+		</unit>
+		<unit name="Months">
+			<eqn/>
+			<alias>mo</alias>
+			<alias>month</alias>
+		</unit>
+		<unit name="US Dollars Per Year">
+			<eqn>US_Dollars/Years</eqn>
+			<alias>US Dollar Per Year</alias>
+		</unit>
+		<unit name="Years">
+			<eqn/>
+			<alias>yr</alias>
+			<alias>year</alias>
+		</unit>
+	</model_units>
+	<model>
+		<variables>
+			<stock name="PROSPECT AREA FOR REGIONAL SURVEY">
+				<eqn>80000</eqn>
+				<outflow>REGIONAL_SURVEY_RATE</outflow>
+				<units>km2</units>
+			</stock>
+			<stock name="PROSPECT AREA FOR\nHI-RES SURVEY">
+				<eqn>0</eqn>
+				<inflow>REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME</inflow>
+				<outflow>&quot;HI-RES_SURVEY_RATE&quot;</outflow>
+				<units>km2</units>
+			</stock>
+			<stock name="DISCARDED AREA">
+				<eqn>0</eqn>
+				<inflow>&quot;COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_HI-RES_SURVEY&quot;</inflow>
+				<inflow>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_CORING</inflow>
+				<inflow>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_REGIONAL_SURVEY</inflow>
+				<inflow>EIA_DISAPPROVAL_RATE</inflow>
+				<units>km2</units>
+			</stock>
+			<flow name="REGIONAL SURVEY WITH\nDESIRABLE OUTCOME">
+				<eqn>DELAY(REGIONAL_SURVEY_RATE*PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME, 1)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<flow name="COMMERCIAL POTENTIAL DISCONFIRMATION\nAFTER REGIONAL SURVEY">
+				<eqn>DELAY(REGIONAL_SURVEY_RATE*(1-PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME) , 1)</eqn>
+				<non_negative/>
+				<units>km2/Years</units>
+			</flow>
+			<flow name="CORING WITH DESIRABLE OUTCOME">
+				<eqn>DELAY(PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME*CORING_RATE, 1)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<aux name="PERCENTAGE OF SURVEY AREA WITH DESIRABLE OUTCOME">
+				<eqn>LOGNORMAL(EXPECTED_PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME, STANDARD_DEVIATION_REGIONAL_SURVEY, SEED_REGIONAL_SURVEY, 0, 1, 1)</eqn>
+			</aux>
+			<aux name="STANDARD DEVIATION REGIONAL SURVEY">
+				<eqn>0.075*STD_SCALING_FACTOR*STOCHASTIC_SWITCH</eqn>
+			</aux>
+			<aux name="EXPECTED PERCENTAGE OF SURVEY AREA WITH DESIRABLE OUTCOME">
+				<eqn>0.15</eqn>
+			</aux>
+			<aux name="SEED REGIONAL SURVEY">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="PERCENTAGE OF CORING\nAREA WITH DESIRABLE OUTCOME">
+				<eqn>LOGNORMAL(EXPECTED_PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME, STANDARD_DEVIATION_CORING, SEED_CORING, 0, 1, 1)</eqn>
+			</aux>
+			<aux name="STANDARD DEVIATION CORING">
+				<eqn>0.125*STD_SCALING_FACTOR*STOCHASTIC_SWITCH</eqn>
+			</aux>
+			<aux name="EXPECTED PERCENTAGE OF CORING\nAREA WITH DESIRABLE OUTCOME">
+				<eqn>0.25</eqn>
+			</aux>
+			<aux name="SEED CORING">
+				<eqn>4</eqn>
+			</aux>
+			<stock name="COMMERCIAL MINERAL STOCK">
+				<eqn>0</eqn>
+				<inflow>COMMERCIAL_ORE_DISCOVERY</inflow>
+				<outflow>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</outflow>
+				<units>million tons</units>
+			</stock>
+			<flow name="EXTRACTION FROM\nCOMMERCIAL MINERAL STOCK">
+				<eqn>IF COMMERCIAL_MINERAL_STOCK&gt;COMMITTED_MINING_FLEET*EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR THEN COMMITTED_MINING_FLEET*EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR
+
+ELSE IF COMMERCIAL_MINERAL_STOCK&lt; COMMITTED_MINING_FLEET*EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR THEN COMMERCIAL_MINERAL_STOCK 
+
+ELSE 0</eqn>
+				<non_negative/>
+				<units>million tons/Years</units>
+			</flow>
+			<stock name="MINING REVENUE">
+				<eqn>0</eqn>
+				<inflow>REVENUE_RATE</inflow>
+				<units>US Dollars</units>
+			</stock>
+			<flow name="REVENUE RATE">
+				<eqn>&quot;PRE-PROCESSED_PRICE&quot;*EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</eqn>
+				<units>US Dollars Per Year</units>
+			</flow>
+			<aux name="PRICE TREND FACTOR">
+				<eqn>0</eqn>
+				<units>US Dollars</units>
+			</aux>
+			<stock name="AVAILABLE REGIONAL SURVEY SHIPS">
+				<eqn>2</eqn>
+				<inflow>REGIONAL_SURVEY_BUILD_ORDER_RATE</inflow>
+				<outflow>AVAILABLE_SURVEY_SHIPS_SCRAPPING</outflow>
+				<outflow>COMISSION_RATE_REGIONAL_SURVEY</outflow>
+				<units>Vessel</units>
+			</stock>
+			<flow name="REGIONAL SURVEY BUILD ORDER RATE">
+				<eqn>IF SURVEY_FLEET_GAP &gt; 0 THEN SURVEY_FLEET_GAP+AVAILABLE_SURVEY_SHIPS_SCRAPPING+SHIPS_COMMITTED_TO_REGIONAL_SURVEY_SCRAPPING
+
+ELSE IF SURVEY_FLEET_GAP = 0 THEN AVAILABLE_SURVEY_SHIPS_SCRAPPING+SHIPS_COMMITTED_TO_REGIONAL_SURVEY_SCRAPPING
+
+ELSE 0</eqn>
+				<non_negative/>
+				<units>Vessel/year</units>
+			</flow>
+			<flow name="AVAILABLE SURVEY SHIPS SCRAPPING">
+				<eqn>AVAILABLE_REGIONAL_SURVEY_SHIPS/AVERAGE_LIFETIME_OF_REGIONAL_SURVEY_SHIPS</eqn>
+				<non_negative/>
+				<units>Vessel/year</units>
+			</flow>
+			<stock name="SHIPS COMMITTED\nTO REGIONAL SURVEY">
+				<eqn>0</eqn>
+				<inflow>COMISSION_RATE_REGIONAL_SURVEY</inflow>
+				<outflow>SHIPS_COMMITTED_TO_REGIONAL_SURVEY_SCRAPPING</outflow>
+				<units>Vessel</units>
+			</stock>
+			<aux name="AVERAGE LIFETIME OF\nREGIONAL SURVEY SHIPS">
+				<eqn>20</eqn>
+				<units>Years</units>
+			</aux>
+			<aux name="REGIONAL SURVEY SPEED PER YEAR">
+				<eqn>2*REGIONAL_SURVEY_KTS_CONVERTER*18*28*6</eqn>
+				<units>km/month</units>
+			</aux>
+			<aux name="REGIONAL SURVEY SWATH">
+				<eqn>1.2</eqn>
+				<units>Km</units>
+			</aux>
+			<aux name="REGIONAL SURVEY KTS CONVERTER">
+				<eqn>1.852</eqn>
+				<units>km/h</units>
+			</aux>
+			<aux name="REGIONAL SURVEY\nSHIP KM2/YEAR">
+				<eqn>REGIONAL_SURVEY_SPEED_PER_YEAR*REGIONAL_SURVEY_SWATH</eqn>
+			</aux>
+			<aux name="AREA CONCLUDED PER\nCORING CAMPAIGN">
+				<eqn>0.2125</eqn>
+				<units>km2</units>
+			</aux>
+			<stock name="MINING FLEET UNDER CONSTRUCTION">
+				<eqn>0</eqn>
+				<inflow>MINING_UNIT_BUILD_ORDER_RATE</inflow>
+				<outflow>BUILD_COMPLETION_RATE_OF_MINING_UNIT</outflow>
+				<units>mining spread</units>
+			</stock>
+			<stock name="AVAILABLE MINING FLEET">
+				<eqn>0</eqn>
+				<inflow>BUILD_COMPLETION_RATE_OF_MINING_UNIT</inflow>
+				<outflow>AVAILABLE_MINING_FLEET_SCRAPPING</outflow>
+				<outflow>MINING_FLEET_COMMISSION_RATE</outflow>
+				<units>mining spread</units>
+			</stock>
+			<flow name="BUILD COMPLETION RATE OF\nMINING UNIT">
+				<eqn>DELAY(MINING_UNIT_BUILD_ORDER_RATE, MINING_UNIT_LEAD_TIME)</eqn>
+				<units>mining spread/Years</units>
+			</flow>
+			<aux name="MINING UNIT LEAD TIME">
+				<eqn>2</eqn>
+				<units>Years</units>
+			</aux>
+			<flow name="AVAILABLE MINING FLEET SCRAPPING">
+				<eqn>AVAILABLE_MINING_FLEET/AVERAGE_LIFETIME_OF_MINING_FLEET</eqn>
+				<units>mining spread/Years</units>
+			</flow>
+			<flow name="MINING UNIT BUILD ORDER RATE">
+				<eqn>MAX(MINING_FLEET_GAP+AVAILABLE_MINING_FLEET_SCRAPPING+COMMITTED_MINING_FLEET_SCRAPPING, 0)</eqn>
+				<units>mining spread/Years</units>
+			</flow>
+			<aux name="AVERAGE LIFETIME OF MINING FLEET">
+				<eqn>15</eqn>
+			</aux>
+			<flow name="COMMERCIAL POTENTIAL\nDISCONFIRMATION\nAFTER HI-RES SURVEY">
+				<eqn>DELAY((1-&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;)*&quot;HI-RES_SURVEY_RATE&quot;, 12)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<stock name="AREA WITH CONFIRMED ORE">
+				<eqn>0</eqn>
+				<inflow>CORING_WITH_DESIRABLE_OUTCOME</inflow>
+				<outflow>EIA_RATE</outflow>
+				<units>km2</units>
+			</stock>
+			<flow name="COMMERCIAL ORE DISCOVERY">
+				<eqn>EIA_APPROVAL_RATE*AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</eqn>
+				<units>million tons/Years</units>
+			</flow>
+			<flow name="COMISSION RATE REGIONAL SURVEY">
+				<eqn>IF DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY&lt;0 AND SHIPS_COMMITTED_TO_REGIONAL_SURVEY&gt;DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY 
+
+THEN (DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY)/DT
+
+ELSE IF DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY&lt;0 AND SHIPS_COMMITTED_TO_REGIONAL_SURVEY&lt;DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY 
+
+THEN SHIPS_COMMITTED_TO_REGIONAL_SURVEY/DT
+
+ELSE IF DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY&gt;0 AND DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY&lt;AVAILABLE_REGIONAL_SURVEY_SHIPS
+
+THEN (DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY)/DT
+
+ELSE IF DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY&gt;0 AND DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-SHIPS_COMMITTED_TO_REGIONAL_SURVEY&gt;AVAILABLE_REGIONAL_SURVEY_SHIPS
+
+THEN AVAILABLE_REGIONAL_SURVEY_SHIPS/DT
+
+ELSE 0</eqn>
+				<units>Vessel/year</units>
+			</flow>
+			<aux name="TOTAL SURVEY FLEET">
+				<eqn>SHIPS_COMMITTED_TO_REGIONAL_SURVEY+AVAILABLE_REGIONAL_SURVEY_SHIPS</eqn>
+			</aux>
+			<stock name="PROSPECT AREA FOR CORING">
+				<eqn>0</eqn>
+				<inflow>&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;</inflow>
+				<outflow>CORING_RATE</outflow>
+				<units>km2</units>
+			</stock>
+			<flow name="HI-RES SURVEY WITH\nDESIRABLE OUTCOME">
+				<eqn>DELAY(&quot;HI-RES_SURVEY_RATE&quot;*&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;, 1)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<flow name="COMMERCIAL POTENTIAL DISCONFIRMATION AFTER CORING">
+				<eqn>DELAY((1-PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME)*CORING_RATE, 1)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<aux name="HI-RES SURVEY\nSPEED PER YEAR">
+				<eqn>1*&quot;HI-RES_KTS_CONVERTER&quot;*18*28*6</eqn>
+				<units>km/month</units>
+			</aux>
+			<aux name="HI-RES KTS CONVERTER">
+				<eqn>1.852</eqn>
+				<units>km/h</units>
+			</aux>
+			<aux name="HI-RES SURVEY SWATH">
+				<eqn>0.5</eqn>
+				<units>Km</units>
+			</aux>
+			<aux name="HI-RES SURVEY SHIP KM2/YEAR">
+				<eqn>&quot;HI-RES_SURVEY_SPEED_PER_YEAR&quot;*&quot;HI-RES_SURVEY_SWATH&quot;</eqn>
+			</aux>
+			<aux name="PERCENTAGE OF HI-RES SURVEY\nAREA WITH DESIRABLE OUTCOME">
+				<eqn>LOGNORMAL(&quot;EXPECTED_PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;, &quot;STANDARD_DEVIATION_HI-RES_SURVEY&quot;, &quot;SEED_HI-RES_SURVEY&quot;, 0, 1, 1)</eqn>
+			</aux>
+			<aux name="STANDARD DEVIATION\nHI-RES SURVEY">
+				<eqn>0.005*STD_SCALING_FACTOR*STOCHASTIC_SWITCH</eqn>
+			</aux>
+			<aux name="EXPECTED PERCENTAGE OF HI-RES\nSURVEY AREA WITH\nDESIRABLE OUTCOME">
+				<eqn>0.01</eqn>
+			</aux>
+			<aux name="SEED HI-RES SURVEY">
+				<eqn>8</eqn>
+			</aux>
+			<stock name="PROSPECT AREA UNDERGOING EVALUATION AFTER REGIONAL SURVEY">
+				<eqn>0</eqn>
+				<inflow>REGIONAL_SURVEY_RATE</inflow>
+				<outflow>REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME</outflow>
+				<outflow>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_REGIONAL_SURVEY</outflow>
+				<units>km2</units>
+			</stock>
+			<flow name="REGIONAL SURVEY RATE">
+				<eqn>MIN(SHIPS_COMMITTED_TO_REGIONAL_SURVEY*&quot;REGIONAL_SURVEY_SHIP_KM2/YEAR&quot;, PROSPECT_AREA_FOR_REGIONAL_SURVEY)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<stock name="PROSPECT AREA UNDERGOING\nEVALUATION AFTER HI-RES SURVEY">
+				<eqn>0</eqn>
+				<inflow>&quot;HI-RES_SURVEY_RATE&quot;</inflow>
+				<outflow>&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;</outflow>
+				<outflow>&quot;COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_HI-RES_SURVEY&quot;</outflow>
+				<units>km2</units>
+			</stock>
+			<flow name="HI-RES SURVEY RATE">
+				<eqn>MIN(&quot;SHIPS_COMMITTED_TO_HI-RES&quot;*&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;,   &quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<stock name="PROSPECT AREA UNDERGOING EVALUATION AFTER CORING">
+				<eqn>0</eqn>
+				<inflow>CORING_RATE</inflow>
+				<outflow>CORING_WITH_DESIRABLE_OUTCOME</outflow>
+				<outflow>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_CORING</outflow>
+				<units>km2</units>
+			</stock>
+			<flow name="CORING RATE">
+				<eqn>MIN(SHIPS_COMMITTED_TO_CORING*AREA_CONCLUDED_PER_CORING_CAMPAIGN*MAXIMUM_NUMBER_OF_CORING_CAMPAIGNS_PER_SHIP_PER_YEAR,  PROSPECT_AREA_FOR_CORING)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<flow name="SHIPS COMMITTED\nTO REGIONAL SURVEY SCRAPPING">
+				<eqn>SHIPS_COMMITTED_TO_REGIONAL_SURVEY/AVERAGE_LIFETIME_OF_REGIONAL_SURVEY_SHIPS</eqn>
+				<non_negative/>
+				<units>Vessel/year</units>
+			</flow>
+			<aux name="PRICE BASIS">
+				<eqn>38808</eqn>
+				<units>US Dollars / tons</units>
+			</aux>
+			<stock name="PRICE OF PROCESSED MINERALS IN END-MARKET">
+				<eqn>PRICE_BASIS*1000000</eqn>
+				<inflow>NET_CHANGE_IN_PRICE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="NET CHANGE IN PRICE">
+				<eqn>&quot;PRICE_OF_PROCESSED_MINERALS_IN_END-MARKET&quot;*PRICE_TREND_FACTOR</eqn>
+			</flow>
+			<aux name="ORE GRADE (MINERAL CONCENTRATION)">
+				<eqn>0.05</eqn>
+			</aux>
+			<aux name="PRE-PROCESSED FACTOR FOR PRICE CALCULATION">
+				<eqn>(1-&quot;PROCESSING&apos;S_PERCENTAGE_OF_END-MARKET_PRICE&quot;)*&quot;ORE_GRADE_(MINERAL_CONCENTRATION)&quot;</eqn>
+			</aux>
+			<aux name="PRE-PROCESSED PRICE">
+				<eqn>&quot;PRICE_OF_PROCESSED_MINERALS_IN_END-MARKET&quot;*&quot;PRE-PROCESSED_FACTOR_FOR_PRICE_CALCULATION&quot;</eqn>
+			</aux>
+			<aux name="PROCESSING'S PERCENTAGE\nOF END-MARKET PRICE">
+				<eqn>0.5</eqn>
+			</aux>
+			<aux name="COPPER, ZINC, COBALT\nMIX EXTRACTION">
+				<eqn>&quot;ORE_GRADE_(MINERAL_CONCENTRATION)&quot;*EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</eqn>
+				<units>Thousand tons</units>
+			</aux>
+			<aux name="PURE MINERAL STOCK">
+				<eqn>COMMERCIAL_MINERAL_STOCK*&quot;ORE_GRADE_(MINERAL_CONCENTRATION)&quot;</eqn>
+			</aux>
+			<aux name="HYPOTHETICAL NONDISCOUNTED VALUE OF MINERAL STOCK">
+				<eqn>PURE_MINERAL_STOCK*&quot;PRICE_OF_PROCESSED_MINERALS_IN_END-MARKET&quot;</eqn>
+			</aux>
+			<aux name="BUILD COST PER PRODUCTION SUPPORT VESSEL">
+				<eqn>1000000000*1</eqn>
+				<units>US Dollars</units>
+			</aux>
+			<aux name="YEARLY RATE FOR PRODUCTION SUPPORT VESSELS">
+				<eqn>150000000*1</eqn>
+				<units>US Dollars Per Year</units>
+			</aux>
+			<stock name="AVAILABLE SHIPS FOR HI-RES, CORING AND EIA">
+				<eqn>INITIAL_AVAILABLE_SHIPS</eqn>
+				<inflow>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;</inflow>
+				<outflow>CORING_COMMISION_RATE</outflow>
+				<outflow>&quot;HI-RES_COMMISION_RATE&quot;</outflow>
+				<outflow>AVAILABLE_SHIPS_SCRAPPING</outflow>
+				<outflow>EIA_COMMISSION_RATE</outflow>
+			</stock>
+			<stock name="SHIPS COMMITTED TO HI-RES">
+				<eqn>0</eqn>
+				<inflow>&quot;HI-RES_COMMISION_RATE&quot;</inflow>
+				<outflow>&quot;SHIIPS_COMMITTED_TO_HI-RES_SCRAPPING&quot;</outflow>
+			</stock>
+			<stock name="SHIPS COMMITTED TO CORING">
+				<eqn>0</eqn>
+				<inflow>CORING_COMMISION_RATE</inflow>
+				<outflow>SHIPS_COMMITTED_TO_CORING_SCRAPPING</outflow>
+			</stock>
+			<flow name="CORING COMMISION RATE">
+				<eqn>IF &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)&gt;0 
+
+THEN MIN(DESIRED_SHIPS_COMMITTED_TO_CORING-SHIPS_COMMITTED_TO_CORING, &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;)/TIME_TO_COMMIT_OR_RECOMMIT_SHIPS
+
+ELSE IF &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)&lt;0 AND &quot;SHIPS_COMMITTED_TO_HI-RES&quot;&gt;(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)
+
+THEN 0
+
+ELSE IF &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)&lt;0
+
+THEN MAX(-SHIPS_COMMITTED_TO_CORING, (-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)))/TIME_TO_COMMIT_OR_RECOMMIT_SHIPS
+
+ELSE 0</eqn>
+			</flow>
+			<flow name="HI-RES COMMISION RATE">
+				<eqn>IF &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-(DESIRED_SHIPS_COMMITTED_TO_CORING-SHIPS_COMMITTED_TO_CORING)-(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)&gt;0 
+
+THEN MIN(&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;, &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;)/TIME_TO_COMMIT_OR_RECOMMIT_SHIPS
+
+ELSE IF &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-(DESIRED_SHIPS_COMMITTED_TO_CORING-SHIPS_COMMITTED_TO_CORING)-(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA)&lt;0 
+
+THEN -&quot;SHIPS_COMMITTED_TO_HI-RES&quot;/TIME_TO_COMMIT_OR_RECOMMIT_SHIPS
+
+ELSE 0</eqn>
+			</flow>
+			<flow name="SHIPS FOR\nHI-RES, CORING\nAND EIA BUILD ORDER RATE">
+				<eqn>IF &quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_UNDER_CONSTRUCTION&quot;&gt;=0
+
+THEN (&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_UNDER_CONSTRUCTION&quot;)/TIME_TO_COMPLETE_DESIRED_INVESTMENT+SHIPS_AT_REPLACEMENT_DATE/TIME_TO_COMPLETE_DESIRED_INVESTMENT
+
+ELSE IF &quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;&gt;=&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-SHIPS_AT_REPLACEMENT_DATE THEN SHIPS_AT_REPLACEMENT_DATE/TIME_TO_COMPLETE_DESIRED_INVESTMENT
+
+ELSE 0</eqn>
+			</flow>
+			<flow name="AVAILABLE SHIPS SCRAPPING">
+				<eqn>IF NUMBERS_OF_SHIPS_TO_SCRAP&gt;0 AND &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;&gt;NUMBERS_OF_SHIPS_TO_SCRAP 
+
+THEN NUMBERS_OF_SHIPS_TO_SCRAP/DT
+
+ELSE IF NUMBERS_OF_SHIPS_TO_SCRAP&gt;0 AND &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;&lt;=NUMBERS_OF_SHIPS_TO_SCRAP 
+
+THEN &quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;/DT
+
+ELSE 0</eqn>
+			</flow>
+			<flow name="SHIIPS COMMITTED TO HI-RES SCRAPPING">
+				<eqn>IF NUMBERS_OF_SHIPS_TO_SCRAP&gt;&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot; AND &quot;SHIPS_COMMITTED_TO_HI-RES&quot;&gt;NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot; 
+
+THEN (NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;)/DT 
+
+ELSE IF NUMBERS_OF_SHIPS_TO_SCRAP-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;&gt;0 AND &quot;SHIPS_COMMITTED_TO_HI-RES&quot;&lt;=NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;
+
+THEN &quot;SHIPS_COMMITTED_TO_HI-RES&quot;/DT
+
+ELSE 0</eqn>
+			</flow>
+			<flow name="SHIPS COMMITTED TO CORING SCRAPPING">
+				<eqn>IF NUMBERS_OF_SHIPS_TO_SCRAP&gt;&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;+&quot;SHIPS_COMMITTED_TO_HI-RES&quot; 
+
+AND SHIPS_COMMITTED_TO_CORING&gt;NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;
+
+THEN (NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;)/DT 
+
+ELSE IF NUMBERS_OF_SHIPS_TO_SCRAP-SHIPS_COMMITTED_TO_CORING&gt;0 AND SHIPS_COMMITTED_TO_CORING&lt;=NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;
+
+THEN (SHIPS_COMMITTED_TO_CORING)/DT
+
+ELSE 0</eqn>
+			</flow>
+			<stock name="SHIPS COMMITTED TO EIA">
+				<eqn>0</eqn>
+				<inflow>EIA_COMMISSION_RATE</inflow>
+				<outflow>SHIPS_COMMITTED_TO_EIA_SCRAPPING</outflow>
+			</stock>
+			<aux name="DESIRED SHIPS COMMITTED TO CORING">
+				<eqn>DESIRED_AREA_COVERED_CORING/
+
+
+(AREA_CONCLUDED_PER_CORING_CAMPAIGN*MAXIMUM_NUMBER_OF_CORING_CAMPAIGNS_PER_SHIP_PER_YEAR)</eqn>
+			</aux>
+			<aux name="DESIRED SHIPS COMMITTED TO HI-RES">
+				<eqn>&quot;DESIRED_AREA_COVERED_BY_HI-RES&quot;/&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</eqn>
+			</aux>
+			<aux name="DESIRED SHIPS COMMITTED TO EIA">
+				<eqn>DESIRED_AREA_COVERED_EIA/&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;*EIA_AREA_AMPLIFIER</eqn>
+			</aux>
+			<flow name="EIA COMMISSION RATE">
+				<eqn>MIN(DESIRED_SHIPS_COMMITTED_TO_EIA-SHIPS_COMMITTED_TO_EIA,&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;)/TIME_TO_COMMIT_OR_RECOMMIT_SHIPS</eqn>
+			</flow>
+			<flow name="SHIPS COMMITTED TO EIA SCRAPPING">
+				<eqn>IF NUMBERS_OF_SHIPS_TO_SCRAP&gt;&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;+&quot;SHIPS_COMMITTED_TO_HI-RES&quot;+SHIPS_COMMITTED_TO_CORING 
+
+AND SHIPS_COMMITTED_TO_EIA&gt;NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;-SHIPS_COMMITTED_TO_CORING
+
+THEN (NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;-SHIPS_COMMITTED_TO_CORING)/DT
+
+ELSE IF NUMBERS_OF_SHIPS_TO_SCRAP-SHIPS_COMMITTED_TO_EIA&gt;0 AND SHIPS_COMMITTED_TO_EIA&lt;=NUMBERS_OF_SHIPS_TO_SCRAP-&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-&quot;SHIPS_COMMITTED_TO_HI-RES&quot;-SHIPS_COMMITTED_TO_CORING
+
+THEN SHIPS_COMMITTED_TO_EIA/DT
+
+ELSE 0</eqn>
+			</flow>
+			<aux name="TOTAL DESIRED SHIPS FOR HI-RES, CORING AND EIA">
+				<eqn>(&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;+DESIRED_SHIPS_COMMITTED_TO_CORING+DESIRED_SHIPS_COMMITTED_TO_EIA+DESIRED_AVAILABLE_SHIPS)*(1-AGRESSIVE_POLICY_SWITCH)
+
++
+
+AGRESSIVE_POLICY_SWITCH*
+
+MAX((&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;+DESIRED_SHIPS_COMMITTED_TO_CORING+DESIRED_SHIPS_COMMITTED_TO_EIA+DESIRED_AVAILABLE_SHIPS), (DESIRED_AVAILABLE_SHIPS+&quot;EXPECTED_DESIRED_SHIPS_FOR_HI-RES_IN_TWO_YEARS&quot;+EXPECTED_DESIRED_SHIPS_COMMITTED_TO_CORING_IN_TWO_YEARS+EXPECTED_DESIRED_SHIPS_COMMITTED_TO_EIA_IN_TWO_YEARS))</eqn>
+			</aux>
+			<aux name="TOTAL SHIPS FOR HI-RES, CORING AND EIA">
+				<eqn>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;+SHIPS_COMMITTED_TO_CORING+SHIPS_COMMITTED_TO_EIA+&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</eqn>
+			</aux>
+			<aux name="SURVEY SHIPS LEAD TIME">
+				<eqn>2</eqn>
+			</aux>
+			<stock name="SHIPS FOR HI-RES, CORING AND EIA UNDER CONSTRUCTION">
+				<eqn>0</eqn>
+				<inflow>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</inflow>
+				<outflow>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;</outflow>
+			</stock>
+			<flow name="SHIPS FOR HI-RES, CORING AND EIA BUILD COMPLETION">
+				<eqn>DELAY(&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;, SURVEY_SHIPS_LEAD_TIME)</eqn>
+			</flow>
+			<aux name="TIME TO COMPLETE DESIRED INVESTMENT">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="AVERAGE LIFETIME OF SHIPS FOR HI-RES, CORING AND EIA">
+				<eqn>20</eqn>
+			</aux>
+			<stock name="SHIPS DUE FOR SCRAPPING">
+				<eqn>0</eqn>
+				<inflow>SHIPS_CLOSING_UP_TO_END_OF_LIFETIME</inflow>
+				<outflow>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA_SCRAPPING_RATE&quot;</outflow>
+			</stock>
+			<flow name="SHIPS CLOSING UP TO END OF LIFETIME">
+				<eqn>DELAY(&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;,&quot;AVERAGE_LIFETIME_OF_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;, 0)
+
++STEP(INITIAL_AVAILABLE_SHIPS/DT, INITIAL_SCRAPPING_DATE)-STEP(INITIAL_AVAILABLE_SHIPS/DT, INITIAL_SCRAPPING_DATE+DT)</eqn>
+			</flow>
+			<flow name="TOTAL SHIPS FOR HI-RES, CORING AND EIA\nSCRAPPING RATE">
+				<eqn>AVAILABLE_SHIPS_SCRAPPING+&quot;SHIIPS_COMMITTED_TO_HI-RES_SCRAPPING&quot;+SHIPS_COMMITTED_TO_CORING_SCRAPPING+SHIPS_COMMITTED_TO_EIA_SCRAPPING</eqn>
+			</flow>
+			<aux name="NUMBERS OF SHIPS TO SCRAP">
+				<eqn>SHIPS_DUE_FOR_SCRAPPING</eqn>
+			</aux>
+			<stock name="SCRAPPED NUMBER OF SHIPS">
+				<eqn>0</eqn>
+				<inflow>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA_SCRAPPING_RATE&quot;</inflow>
+				<non_negative/>
+			</stock>
+			<stock name="SHIPS AT REPLACEMENT DATE">
+				<eqn>0</eqn>
+				<inflow>SHIPS_DUE_FOR_REPLACEMENT</inflow>
+				<outflow>SHIPS_REPLACED_OR_OVER_DUE_DATE_FOR_REPLACEMENT</outflow>
+			</stock>
+			<flow name="SHIPS DUE FOR REPLACEMENT">
+				<eqn>DELAY(&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;, &quot;AVERAGE_LIFETIME_OF_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;-SURVEY_SHIPS_LEAD_TIME-TIME_TO_COMMIT_OR_RECOMMIT_SHIPS-TIME_TO_COMPLETE_DESIRED_INVESTMENT)/DT
+
++STEP(INITIAL_AVAILABLE_SHIPS/DT, 5)-STEP(INITIAL_AVAILABLE_SHIPS/DT, 5+DT)</eqn>
+			</flow>
+			<flow name="SHIPS REPLACED OR OVER DUE DATE FOR REPLACEMENT">
+				<eqn>DELAY(SHIPS_DUE_FOR_REPLACEMENT, DT)</eqn>
+			</flow>
+			<stock name="HI-RES, CORING, EIA CAPEX">
+				<eqn>0</eqn>
+				<inflow>EXPLORATION_CAPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="EXPLORATION CAPEX RATE">
+				<eqn>IF &quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;&gt;0 THEN &quot;AVERAGE_COST_OF_NEW_HI-RES,_CORING,_EIA_SHIP&quot;*&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;
+
+ELSE 0</eqn>
+				<non_negative/>
+			</flow>
+			<aux name="AVERAGE COST OF NEW HI-RES, CORING, EIA SHIP">
+				<eqn>100000000</eqn>
+			</aux>
+			<aux name="YEARLY RATE FOR EIA SHIP">
+				<eqn>140000*28*6</eqn>
+			</aux>
+			<aux name="YEARLY RATE FOR CORING SHIP">
+				<eqn>140000*28*6</eqn>
+			</aux>
+			<aux name="YEARLY RATE FOR HI-RES SHIP">
+				<eqn>140000*28*6</eqn>
+			</aux>
+			<stock name="HI-RES OPEX">
+				<eqn>0</eqn>
+				<inflow>&quot;HI-RES_OPEX_RATE&quot;</inflow>
+				<non_negative/>
+			</stock>
+			<stock name="CORING OPEX">
+				<eqn>0</eqn>
+				<inflow>CORING_OPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<stock name="EIA OPEX">
+				<eqn>0</eqn>
+				<inflow>EIA_OPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="HI-RES OPEX RATE">
+				<eqn>&quot;YEARLY_RATE_FOR_HI-RES_SHIP&quot;*&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</eqn>
+			</flow>
+			<flow name="CORING OPEX RATE">
+				<eqn>YEARLY_RATE_FOR_CORING_SHIP*SHIPS_COMMITTED_TO_CORING</eqn>
+			</flow>
+			<flow name="EIA OPEX RATE">
+				<eqn>YEARLY_RATE_FOR_EIA_SHIP*SHIPS_COMMITTED_TO_EIA</eqn>
+			</flow>
+			<stock name="HI-RES, CORING, EIA OPEX">
+				<eqn>0</eqn>
+				<inflow>EXPLORATION_OPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="EXPLORATION OPEX RATE">
+				<eqn>&quot;HI-RES_OPEX_RATE&quot;+CORING_OPEX_RATE+EIA_OPEX_RATE</eqn>
+			</flow>
+			<aux name="INITIAL AVAILABLE SHIPS">
+				<eqn>0</eqn>
+			</aux>
+			<aux name="INITIAL SCRAPPING DATE">
+				<eqn>0</eqn>
+			</aux>
+			<stock name="AREA WITH CONFIRMED ORE UNDERGOING EVALUATION AFTER EIA">
+				<eqn>0</eqn>
+				<inflow>EIA_RATE</inflow>
+				<outflow>EIA_APPROVAL_RATE</outflow>
+				<outflow>EIA_DISAPPROVAL_RATE</outflow>
+				<units>km2</units>
+			</stock>
+			<flow name="EIA RATE">
+				<eqn>MIN(SHIPS_COMMITTED_TO_EIA*&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;/EIA_AREA_AMPLIFIER,  AREA_WITH_CONFIRMED_ORE)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<stock name="EIA APPROVED AREA WITH CONFIRMED ORE">
+				<eqn>0</eqn>
+				<inflow>EIA_APPROVAL_RATE</inflow>
+				<units>km2</units>
+			</stock>
+			<flow name="EIA APPROVAL RATE">
+				<eqn>DELAY(PERCENTAGE_OF_AREA_WITH_CONFIRMED_ORE_RECEIVING_EIA_APPROVAL*EIA_RATE, 1)</eqn>
+				<units>km2/Years</units>
+			</flow>
+			<flow name="EIA DISAPPROVAL RATE">
+				<eqn>DELAY((1-PERCENTAGE_OF_AREA_WITH_CONFIRMED_ORE_RECEIVING_EIA_APPROVAL)*EIA_RATE, 1)</eqn>
+				<non_negative/>
+				<units>km2/Years</units>
+			</flow>
+			<aux name="PERCENTAGE OF AREA WITH CONFIRMED ORE RECEIVING EIA APPROVAL">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="EIA AREA AMPLIFIER">
+				<eqn>314</eqn>
+			</aux>
+			<stock name="COMMITTED MINING FLEET">
+				<eqn>0</eqn>
+				<inflow>MINING_FLEET_COMMISSION_RATE</inflow>
+				<outflow>COMMITTED_MINING_FLEET_SCRAPPING</outflow>
+				<units>mining spread</units>
+			</stock>
+			<flow name="MINING FLEET COMMISSION RATE">
+				<eqn>IF DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET&lt;0
+
+THEN (DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET)/TIME_TO_COMMIT_MINING_FLEET
+
+ELSE IF DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET&gt;0 AND DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET&lt;AVAILABLE_MINING_FLEET
+
+THEN (DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET)/TIME_TO_COMMIT_MINING_FLEET
+
+ELSE IF DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET&gt;0 AND DESIRED_TOTAL_COMMITTED_MINING_FLEET-COMMITTED_MINING_FLEET&gt;AVAILABLE_MINING_FLEET
+
+THEN AVAILABLE_MINING_FLEET/TIME_TO_COMMIT_MINING_FLEET
+
+ELSE 0</eqn>
+				<units>mining spread/Years</units>
+			</flow>
+			<aux name="DESIRED TOTAL COMMITTED MINING FLEET">
+				<eqn>DESIRED_PRODUCTION/EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR</eqn>
+			</aux>
+			<aux name="TOTAL MINING FLEET">
+				<eqn>AVAILABLE_MINING_FLEET+COMMITTED_MINING_FLEET</eqn>
+			</aux>
+			<aux name="MINING FLEET GAP">
+				<eqn>(DESIRED_TOTAL_COMMITTED_MINING_FLEET-TOTAL_MINING_FLEET-MINING_FLEET_UNDER_CONSTRUCTION)*
+
+(1-AGRESSIVE_POLICY_SWITCH)
+
++
+
+(EXPECTED_DESIRED_FUTURE_MINING_FLEET-TOTAL_MINING_FLEET-MINING_FLEET_UNDER_CONSTRUCTION)*AGRESSIVE_POLICY_SWITCH</eqn>
+			</aux>
+			<flow name="COMMITTED MINING FLEET SCRAPPING">
+				<eqn>COMMITTED_MINING_FLEET/AVERAGE_LIFETIME_OF_MINING_FLEET</eqn>
+				<non_negative/>
+				<units>mining spread/Years</units>
+			</flow>
+			<aux name="DESIRED PRODUCTION">
+				<eqn>COMMERCIAL_MINERAL_STOCK*&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;</eqn>
+			</aux>
+			<aux name="EXTRACTION PER MINING FLEET UNIT PER YEAR">
+				<eqn>2*OPERATIONAL_EFFICIENCY</eqn>
+			</aux>
+			<aux name="DESIRED PRODUCTION/COMMERCIAL\nMINERAL STOCK">
+				<eqn>0.5</eqn>
+			</aux>
+			<stock name="MINING CAPEX">
+				<eqn>0</eqn>
+				<inflow>MINING_CAPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<stock name="MINING OPEX">
+				<eqn>0</eqn>
+				<inflow>MINING_OPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="MINING CAPEX RATE">
+				<eqn>BUILD_COST_PER_PRODUCTION_SUPPORT_VESSEL*MINING_UNIT_BUILD_ORDER_RATE</eqn>
+			</flow>
+			<flow name="MINING OPEX RATE">
+				<eqn>YEARLY_RATE_FOR_PRODUCTION_SUPPORT_VESSELS*COMMITTED_MINING_FLEET</eqn>
+			</flow>
+			<stock name="DISCOUNTED PROFITS">
+				<eqn>0</eqn>
+				<inflow>DISCOUNTED_PROFIT_RATE</inflow>
+			</stock>
+			<flow name="DISCOUNTED PROFIT RATE">
+				<eqn>DISCOUNT_FACTOR*(REVENUE_RATE-MINING_CAPEX_RATE-MINING_OPEX_RATE-EXPLORATION_CAPEX_RATE-EXPLORATION_OPEX_RATE-REGIONAL_SURVEY_CAPEX_RATE-REGIONAL_SURVEY_OPEX_RATE)</eqn>
+			</flow>
+			<aux name="DISCOUNT RATE">
+				<eqn>0.1</eqn>
+			</aux>
+			<aux name="DISCOUNT FACTOR">
+				<eqn>1/(1+DISCOUNT_RATE)^TIME</eqn>
+			</aux>
+			<aux name="DESIRED AREA COVERED BY HI-RES">
+				<eqn>&quot;DESIRED_SHARE_OF_TOTAL_HI-RES_AREA_COVERED_BY_HI-RES_PER_YEAR&quot;*&quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;</eqn>
+			</aux>
+			<aux name="DESIRED AREA COVERED CORING">
+				<eqn>DESIRED_SHARE_OF_TOTAL_CORING_AREA_COVERED_BY_CORING_PER_YEAR*PROSPECT_AREA_FOR_CORING</eqn>
+			</aux>
+			<aux name="DESIRED AREA COVERED EIA">
+				<eqn>DESIRED_SHARE_OF_TOTAL_EIA_AREA_COVERED_BY_EIA_PER_YEAR*AREA_WITH_CONFIRMED_ORE</eqn>
+			</aux>
+			<aux name="MAXIMUM NUMBER OF CORING CAMPAIGNS PER SHIP PER YEAR">
+				<eqn>2</eqn>
+			</aux>
+			<aux name="DESIRED SHARE OF TOTAL HI-RES AREA COVERED BY HI-RES PER YEAR">
+				<eqn>1/3</eqn>
+			</aux>
+			<aux name="DESIRED SHARE OF TOTAL CORING AREA COVERED BY CORING PER YEAR">
+				<eqn>1/3</eqn>
+			</aux>
+			<aux name="DESIRED SHARE OF TOTAL EIA AREA COVERED BY EIA PER YEAR">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="DESIRED REGIONAL\nSURVEY RATE">
+				<eqn>DESIRED_SHARE_OF_TOTAL_REGIONAL_SURVEY_AREA_COVERED_BY_REGIONAL_SURVEY_PER_YEAR*PROSPECT_AREA_FOR_REGIONAL_SURVEY</eqn>
+			</aux>
+			<aux name="DESIRED SHARE OF TOTAL REGIONAL\nSURVEY AREA COVERED BY REGIONAL\nSURVEY PER YEAR">
+				<eqn>1/3</eqn>
+			</aux>
+			<aux name="DESIRED SHIPS COMMITTED\nTO REGIONAL SURVEY">
+				<eqn>DESIRED_REGIONAL_SURVEY_RATE/&quot;REGIONAL_SURVEY_SHIP_KM2/YEAR&quot;</eqn>
+			</aux>
+			<aux name="SURVEY FLEET GAP">
+				<eqn>DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY-TOTAL_SURVEY_FLEET</eqn>
+			</aux>
+			<stock name="REGIONAL SURVEY CAPEX">
+				<eqn>0</eqn>
+				<inflow>REGIONAL_SURVEY_CAPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<stock name="REGIONAL SURVEY OPEX">
+				<eqn>0</eqn>
+				<inflow>REGIONAL_SURVEY_OPEX_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="REGIONAL SURVEY CAPEX RATE">
+				<eqn>AVERAGE_COST_OF_REGIONAL_SURVEY_SHIP*REGIONAL_SURVEY_BUILD_ORDER_RATE</eqn>
+			</flow>
+			<flow name="REGIONAL SURVEY OPEX RATE">
+				<eqn>YEARLY_RATE_OF_REGIONAL_SURVEY_SHIP*SHIPS_COMMITTED_TO_REGIONAL_SURVEY</eqn>
+			</flow>
+			<aux name="AVERAGE COST OF REGIONAL\nSURVEY SHIP">
+				<eqn>35000000</eqn>
+			</aux>
+			<aux name="YEARLY RATE OF\nREGIONAL SURVEY SHIP">
+				<eqn>82500*365*0.5</eqn>
+			</aux>
+			<aux name="STOCHASTIC SWITCH">
+				<eqn>0</eqn>
+			</aux>
+			<aux name="DESIRED AVAILABLE SHIPS">
+				<eqn>0</eqn>
+			</aux>
+			<aux name="TOTAL CAPEX">
+				<eqn>&quot;HI-RES,_CORING,_EIA_CAPEX&quot;+REGIONAL_SURVEY_CAPEX+MINING_CAPEX</eqn>
+			</aux>
+			<aux name="TOTAL OPEX">
+				<eqn>&quot;HI-RES,_CORING,_EIA_OPEX&quot;+REGIONAL_SURVEY_OPEX+MINING_OPEX</eqn>
+			</aux>
+			<aux name="OPERATIONAL EFFICIENCY">
+				<eqn>0.72</eqn>
+			</aux>
+			<aux name="STANDARD DEVIATION OCCURENCE">
+				<eqn>1*STD_SCALING_FACTOR*STOCHASTIC_SWITCH</eqn>
+			</aux>
+			<aux name="EXPECTED AVERAGE MILLION TONS\nORE PER KM2 PER DISCOVERY">
+				<eqn>2</eqn>
+				<units>Million tons/km2</units>
+			</aux>
+			<aux name="SEED OCCURENCE">
+				<eqn>7</eqn>
+			</aux>
+			<aux name="AVERAGE MILLION TONS\nORE PER KM2 PER DISCOVERY">
+				<eqn>LOGNORMAL(EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY, STANDARD_DEVIATION_OCCURENCE, SEED_OCCURENCE, 0, 100, 1)</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED SHIPS\nFOR HI-RES IN TWO YEARS">
+				<eqn>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;/&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED AREA COVERED BY HI-RES IN TWO YEARS">
+				<eqn>(((&quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;+REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME-&quot;HI-RES_SURVEY_RATE&quot;)
+
+-(&quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;+REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME-&quot;HI-RES_SURVEY_RATE&quot;)*&quot;DESIRED_SHARE_OF_TOTAL_HI-RES_AREA_COVERED_BY_HI-RES_PER_YEAR&quot;
+
++REGIONAL_SURVEY_RATE*EXPECTED_PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME)*&quot;DESIRED_SHARE_OF_TOTAL_HI-RES_AREA_COVERED_BY_HI-RES_PER_YEAR&quot;)</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED AREA COVERED BY CORING IN TWO YEARS">
+				<eqn>((PROSPECT_AREA_FOR_CORING+&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;-CORING_RATE)-(PROSPECT_AREA_FOR_CORING+&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;-CORING_RATE)*DESIRED_SHARE_OF_TOTAL_CORING_AREA_COVERED_BY_CORING_PER_YEAR+&quot;HI-RES_SURVEY_RATE&quot;*&quot;EXPECTED_PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;)*DESIRED_SHARE_OF_TOTAL_CORING_AREA_COVERED_BY_CORING_PER_YEAR</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED SHIPS COMMITTED TO CORING IN TWO YEARS">
+				<eqn>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS/
+
+(MAXIMUM_NUMBER_OF_CORING_CAMPAIGNS_PER_SHIP_PER_YEAR*AREA_CONCLUDED_PER_CORING_CAMPAIGN)</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED AREA COVERED BY EIA IN TWO YEARS">
+				<eqn>((AREA_WITH_CONFIRMED_ORE+CORING_WITH_DESIRABLE_OUTCOME-EIA_RATE)-(AREA_WITH_CONFIRMED_ORE+CORING_WITH_DESIRABLE_OUTCOME-EIA_RATE)*DESIRED_SHARE_OF_TOTAL_EIA_AREA_COVERED_BY_EIA_PER_YEAR+CORING_RATE*EXPECTED_PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME)*DESIRED_SHARE_OF_TOTAL_EIA_AREA_COVERED_BY_EIA_PER_YEAR</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED SHIPS COMMITTED TO EIA IN TWO YEARS">
+				<eqn>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS/&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;*EIA_AREA_AMPLIFIER</eqn>
+			</aux>
+			<aux name="AGRESSIVE POLICY SWITCH">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED PRODUCTION IN ONE YEAR">
+				<eqn>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;*EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED PRODUCTION IN TWO YEARS">
+				<eqn>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;*EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED\nPRODUCTION IN THREE YEARS">
+				<eqn>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;*EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_THREE_YEARS</eqn>
+			</aux>
+			<aux name="EXPECTED COMMERCIAL MINERAL\nSTOCK IN ONE YEAR">
+				<eqn>(COMMERCIAL_MINERAL_STOCK+COMMERCIAL_ORE_DISCOVERY-EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK)</eqn>
+			</aux>
+			<aux name="EXPECTED COMMERCIAL MINERAL\nSTOCK IN TWO YEARS">
+				<eqn>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR+EIA_RATE*EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY-EXPECTED_DESIRED_PRODUCTION_IN_ONE_YEAR</eqn>
+			</aux>
+			<aux name="EXPECTED COMMERCIAL MINERAL\nSTOCK IN THREE YEARS">
+				<eqn>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS+CORING_WITH_DESIRABLE_OUTCOME*EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY-EXPECTED_DESIRED_PRODUCTION_IN_TWO_YEARS</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED FUTURE PRODUCTION">
+				<eqn>EXPECTED_DESIRED_PRODUCTION_IN_THREE_YEARS</eqn>
+			</aux>
+			<aux name="EXPECTED DESIRED FUTURE MINING FLEET">
+				<eqn>EXPECTED_DESIRED_FUTURE_PRODUCTION/EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR</eqn>
+			</aux>
+			<aux name="TIME TO COMMIT OR RECOMMIT SHIPS">
+				<eqn>1/12</eqn>
+			</aux>
+			<aux name="TIME TO COMMIT MINING FLEET">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="STD SCALING FACTOR">
+				<eqn>1</eqn>
+			</aux>
+			<aux name="SURVEY CAPEX">
+				<eqn>REGIONAL_SURVEY_CAPEX+&quot;HI-RES,_CORING,_EIA_CAPEX&quot;</eqn>
+			</aux>
+			<aux name="SURVEY OPEX">
+				<eqn>REGIONAL_SURVEY_OPEX+&quot;HI-RES,_CORING,_EIA_OPEX&quot;</eqn>
+			</aux>
+			<stock name="TOTAL EXTRACTION">
+				<eqn>0</eqn>
+				<inflow>EXTRACTION_RATE</inflow>
+				<non_negative/>
+			</stock>
+			<flow name="EXTRACTION RATE">
+				<eqn>&quot;COPPER,_ZINC,_COBALT_MIX_EXTRACTION&quot;</eqn>
+				<non_negative/>
+			</flow>
+			<aux name="NET VALUE">
+				<eqn>MINING_REVENUE-TOTAL_OPEX-TOTAL_CAPEX</eqn>
+			</aux>
+		</variables>
+		<views>
+			<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+				<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<numeric_display color="blue" background="white" font_size="9pt" isee:transparent="false"/>
+				<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+					<isee:series_styles>
+						<isee:series_style color="blue" thickness="1"/>
+						<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF7F00" thickness="1"/>
+						<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF007F" thickness="1"/>
+						<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#C8C8C8" thickness="1"/>
+					</isee:series_styles>
+				</graph>
+				<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="instantaneous" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				<button color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595"/>
+				<isee:annotation color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595" popup_corner_radius="0" popup_background_color="#FFFECF"/>
+				<slider color="#66CC66" background="#E0E0E0" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" vertical="false" isee:fancy_appearance="false" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:dual_slider color="#66CC66" background="silver" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:sim_speed_slider color="black" background="white"/>
+				<isee:time_slider color="#E95F74" background="silver"/>
+				<isee:pie_input color="black" background="white" font_size="12pt" legend_position="bottom" isee:transparent="false"/>
+				<knob color="#66CC66" background="#E0E0E0" font_size="12pt" label_side="bottom" wrap_title="true"/>
+				<numeric_input color="black" background="#E0E0E0" font_size="12pt" label_side="left" wrap_title="true" input_expands="false" input_width="100"/>
+				<switch color="black" background="#E0E0E0" font_size="12pt" label_side="top" wrap_title="true" isee:appearance="switch" isee:on_color="green"/>
+				<options color="black" background="white" appearance="radio-buttons" arrangement="vertical"/>
+				<graphical_input color="black" background="#E0E0E0" font_size="12pt" isee:show_hover_tip="true"/>
+				<group_input color="black" background="#E0E0E0" font_size="12pt"/>
+				<lamp color="black" background="white" font_size="9pt"/>
+				<gauge color="black" background="white" font_size="9pt" needle_color="#F09F72" bar_color="#EEEEEE" bar_progress_color="black" appearance="radial" num_major_ticks="11" num_minor_ticks="11" show_numeric_value="true"/>
+				<isee:spatial_map color="black" background="white" font_size="12pt"/>
+				<isee:animation_object color="black" background="white" font_size="12pt"/>
+				<isee:navigation_widget color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_color="#999999" border_width="thin" border_style="solid" item_spacing="6" appearance="tabs" corner_radius="4" selected_item_color="black" selected_item_background="white" item_background="#DDDDDD"/>
+				<isee:shape color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid" opacity="1" transparent_background="true"/>
+				<isee:selector color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:iframe color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid"/>
+				<isee:financial_table color="black" background="#E0E0E0" text_align="right" font_size="12pt" hide_border="false" auto_fit="true" first_column_width="250" other_column_width="100" header_font_style="normal" header_font_weight="bold" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="14pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+			</style>
+			<view isee:show_pages="false" background="white" page_width="1078" page_height="742" isee:page_cols="8" isee:page_rows="7" isee:scroll_x="1137" isee:scroll_y="1771" isee:popup_graphs_are_comparative="true" isee:enable_non_negative_highlights="false" type="stock_flow">
+				<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+					<stock color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="45" height="35"/>
+					</stock>
+					<flow color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom"/>
+					<isee:placeholder color="#228B22" background="white" font_color="#228B22" font_size="9pt" label_side="bottom"/>
+					<module color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="55" height="45"/>
+					</module>
+					<aux color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</aux>
+					<group color="red" background="white" font_color="red" font_size="9pt"/>
+					<connector color="#FF007F" background="white" font_color="#FF007F" font_size="9pt" isee:thickness="1"/>
+					<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<numeric_display color="blue" background="white" font_size="9pt" isee:transparent="false"/>
+					<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+						<isee:series_styles>
+							<isee:series_style color="blue" thickness="1"/>
+							<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF7F00" thickness="1"/>
+							<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF007F" thickness="1"/>
+							<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#C8C8C8" thickness="1"/>
+						</isee:series_styles>
+					</graph>
+					<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="instantaneous" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				</style>
+				<stock font_size="14pt" label_side="top" x="688.047" y="3160.68" name="PROSPECT AREA FOR REGIONAL SURVEY"/>
+				<stock color="fuchsia" font_color="fuchsia" font_size="14pt" x="1206.37" y="3161.93" name="PROSPECT AREA FOR\nHI-RES SURVEY"/>
+				<stock font_size="14pt" label_side="bottom" x="1397.36" y="3317.31" name="DISCARDED AREA"/>
+				<flow font_size="14pt" label_side="bottom" x="1080.15" y="3161.93" name="REGIONAL SURVEY WITH\nDESIRABLE OUTCOME">
+					<pts>
+						<pt x="976.437" y="3161.93"/>
+						<pt x="1183.87" y="3161.93"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" label_side="bottom" x="1154.76" y="3321.27" name="COMMERCIAL POTENTIAL DISCONFIRMATION\nAFTER REGIONAL SURVEY">
+					<pts>
+						<pt x="946.667" y="3182.43"/>
+						<pt x="946.667" y="3321.27"/>
+						<pt x="1374.86" y="3321.27"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" label_side="bottom" x="1897.12" y="3158.92" name="CORING WITH DESIRABLE OUTCOME">
+					<pts>
+						<pt x="1787.92" y="3158.92"/>
+						<pt x="2006.32" y="3158.92"/>
+					</pts>
+				</flow>
+				<aux font_size="14pt" label_side="bottom" x="1012.56" y="2957.18" name="PERCENTAGE OF SURVEY AREA WITH DESIRABLE OUTCOME"/>
+				<aux font_size="14pt" label_side="left" x="846.408" y="2960.47" name="STANDARD DEVIATION REGIONAL SURVEY"/>
+				<aux font_size="14pt" label_side="left" x="846.408" y="2920.71" name="EXPECTED PERCENTAGE OF SURVEY AREA WITH DESIRABLE OUTCOME"/>
+				<aux font_size="14pt" label_side="left" x="846.408" y="2993.13" name="SEED REGIONAL SURVEY"/>
+				<connector uid="25" angle="347.621">
+					<from>EXPECTED_PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="26" angle="1.13287">
+					<from>STANDARD_DEVIATION_REGIONAL_SURVEY</from>
+					<to>PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="27" angle="12.2071">
+					<from>SEED_REGIONAL_SURVEY</from>
+					<to>PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<aux font_size="14pt" x="1895.6" y="2981.16" name="PERCENTAGE OF CORING\nAREA WITH DESIRABLE OUTCOME"/>
+				<aux font_size="14pt" label_side="left" x="1763.1" y="2963.16" name="STANDARD DEVIATION CORING"/>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="left" x="1763.1" y="2926.5" name="EXPECTED PERCENTAGE OF CORING\nAREA WITH DESIRABLE OUTCOME"/>
+				<aux font_size="14pt" label_side="left" x="1763.1" y="3002.5" name="SEED CORING"/>
+				<connector uid="31" angle="337.582">
+					<from>EXPECTED_PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="32" angle="352.264">
+					<from>STANDARD_DEVIATION_CORING</from>
+					<to>PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="33" angle="9.14929">
+					<from>SEED_CORING</from>
+					<to>PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<stock font_size="14pt" label_side="top" x="3165.32" y="3387.47" name="COMMERCIAL MINERAL STOCK"/>
+				<flow font_size="14pt" label_side="bottom" x="3327.75" y="3388.33" name="EXTRACTION FROM\nCOMMERCIAL MINERAL STOCK">
+					<pts>
+						<pt x="3187.82" y="3388.33"/>
+						<pt x="3491.67" y="3388.33"/>
+					</pts>
+				</flow>
+				<stock font_size="14pt" x="4211.84" y="2660.5" name="MINING REVENUE"/>
+				<flow font_size="14pt" x="4118.5" y="2660.5" name="REVENUE RATE">
+					<pts>
+						<pt x="4035.66" y="2660.5"/>
+						<pt x="4189.34" y="2660.5"/>
+					</pts>
+				</flow>
+				<connector uid="59" angle="42.6272">
+					<from>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</from>
+					<to>REVENUE_RATE</to>
+				</connector>
+				<aux color="#AA007F" font_color="#AA007F" font_size="14pt" label_side="left" x="3729.07" y="2523.95" name="PRICE TREND FACTOR"/>
+				<stock color="#005500" font_color="#005500" font_size="14pt" x="586.833" y="1949.83" width="65" height="40" name="AVAILABLE REGIONAL SURVEY SHIPS"/>
+				<flow font_size="14pt" x="482.167" y="1973.33" name="REGIONAL SURVEY BUILD ORDER RATE">
+					<pts>
+						<pt x="377.5" y="1973.33"/>
+						<pt x="586.833" y="1973.33"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="760.167" y="1970" name="AVAILABLE SURVEY SHIPS SCRAPPING">
+					<pts>
+						<pt x="651.833" y="1970"/>
+						<pt x="892.5" y="1970"/>
+					</pts>
+				</flow>
+				<connector uid="90" angle="26.4908">
+					<from>AVAILABLE_REGIONAL_SURVEY_SHIPS</from>
+					<to>AVAILABLE_SURVEY_SHIPS_SCRAPPING</to>
+				</connector>
+				<stock font_size="14pt" label_side="left" x="584.792" y="2139.33" width="76.25" height="57.5" name="SHIPS COMMITTED\nTO REGIONAL SURVEY"/>
+				<aux font_size="14pt" label_side="right" label_angle="45" x="705.46" y="2105.33" name="AVERAGE LIFETIME OF\nREGIONAL SURVEY SHIPS"/>
+				<connector uid="99" angle="67.9892">
+					<from>AVERAGE_LIFETIME_OF_REGIONAL_SURVEY_SHIPS</from>
+					<to>AVAILABLE_SURVEY_SHIPS_SCRAPPING</to>
+				</connector>
+				<connector uid="101" angle="104.804">
+					<from>AVAILABLE_SURVEY_SHIPS_SCRAPPING</from>
+					<to>REGIONAL_SURVEY_BUILD_ORDER_RATE</to>
+				</connector>
+				<aux font_size="14pt" label_side="left" x="712.83" y="2422.05" name="REGIONAL SURVEY SPEED PER YEAR"/>
+				<aux font_size="14pt" label_side="right" x="781.73" y="2472.5" name="REGIONAL SURVEY SWATH"/>
+				<aux font_size="14pt" label_side="right" x="781.73" y="2422.05" name="REGIONAL SURVEY KTS CONVERTER"/>
+				<connector uid="102" angle="180">
+					<from>REGIONAL_SURVEY_KTS_CONVERTER</from>
+					<to>REGIONAL_SURVEY_SPEED_PER_YEAR</to>
+				</connector>
+				<aux font_size="14pt" x="712.83" y="2472.5" name="REGIONAL SURVEY\nSHIP KM2/YEAR"/>
+				<connector uid="103" angle="270">
+					<from>REGIONAL_SURVEY_SPEED_PER_YEAR</from>
+					<to>&quot;REGIONAL_SURVEY_SHIP_KM2/YEAR&quot;</to>
+				</connector>
+				<connector uid="104" angle="180">
+					<from>REGIONAL_SURVEY_SWATH</from>
+					<to>&quot;REGIONAL_SURVEY_SHIP_KM2/YEAR&quot;</to>
+				</connector>
+				<connector uid="105" angle="281.238">
+					<from>SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>REGIONAL_SURVEY_RATE</to>
+				</connector>
+				<connector uid="106" angle="278.878">
+					<from>&quot;REGIONAL_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>REGIONAL_SURVEY_RATE</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="left" label_angle="225" x="1682.34" y="2626.68" name="AREA CONCLUDED PER\nCORING CAMPAIGN"/>
+				<connector uid="122" angle="270">
+					<from>AREA_CONCLUDED_PER_CORING_CAMPAIGN</from>
+					<to>CORING_RATE</to>
+				</connector>
+				<stock font_size="14pt" x="3346.08" y="2854.58" name="MINING FLEET UNDER CONSTRUCTION"/>
+				<stock font_size="14pt" x="3045.66" y="2859.58" name="AVAILABLE MINING FLEET"/>
+				<flow font_size="14pt" x="3195.87" y="2854.58" name="BUILD COMPLETION RATE OF\nMINING UNIT">
+					<pts>
+						<pt x="3323.58" y="2854.58"/>
+						<pt x="3068.16" y="2854.58"/>
+					</pts>
+				</flow>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="top" x="3199.5" y="2775.55" name="MINING UNIT LEAD TIME"/>
+				<connector uid="154" angle="267.374">
+					<from>MINING_UNIT_LEAD_TIME</from>
+					<to>BUILD_COMPLETION_RATE_OF_MINING_UNIT</to>
+				</connector>
+				<flow font_size="14pt" x="2870.91" y="2857.5" name="AVAILABLE MINING FLEET SCRAPPING">
+					<pts>
+						<pt x="3023.16" y="2857.5"/>
+						<pt x="2706.67" y="2857.5"/>
+					</pts>
+				</flow>
+				<connector uid="156" angle="141.177">
+					<from>AVAILABLE_MINING_FLEET</from>
+					<to>AVAILABLE_MINING_FLEET_SCRAPPING</to>
+				</connector>
+				<flow font_size="14pt" x="3504.96" y="2853.33" name="MINING UNIT BUILD ORDER RATE">
+					<pts>
+						<pt x="3653.33" y="2853.33"/>
+						<pt x="3368.58" y="2853.33"/>
+					</pts>
+				</flow>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="2876.69" y="2950.42" name="AVERAGE LIFETIME OF MINING FLEET"/>
+				<connector uid="179" angle="93.5545">
+					<from>AVERAGE_LIFETIME_OF_MINING_FLEET</from>
+					<to>AVAILABLE_MINING_FLEET_SCRAPPING</to>
+				</connector>
+				<flow font_size="14pt" label_side="left" x="1397.36" y="3238.99" name="COMMERCIAL POTENTIAL\nDISCONFIRMATION\nAFTER HI-RES SURVEY">
+					<pts>
+						<pt x="1397.36" y="3178.18"/>
+						<pt x="1397.36" y="3299.81"/>
+					</pts>
+				</flow>
+				<stock color="fuchsia" font_color="fuchsia" font_size="14pt" label_side="top" x="2006.32" y="3137.63" width="45" height="35" name="AREA WITH CONFIRMED ORE"/>
+				<flow font_size="14pt" label_side="bottom" x="3005.75" y="3386.67" name="COMMERCIAL ORE DISCOVERY">
+					<pts>
+						<pt x="2856.67" y="3386.67"/>
+						<pt x="3142.82" y="3386.67"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" label_side="left" x="619.333" y="2064.58" name="COMISSION RATE REGIONAL SURVEY">
+					<pts>
+						<pt x="619.333" y="1989.83"/>
+						<pt x="619.333" y="2139.33"/>
+					</pts>
+				</flow>
+				<aux font_size="14pt" x="366.208" y="2173.55" name="TOTAL SURVEY FLEET"/>
+				<connector uid="205" angle="218.828">
+					<from>AVAILABLE_REGIONAL_SURVEY_SHIPS</from>
+					<to>TOTAL_SURVEY_FLEET</to>
+				</connector>
+				<connector uid="206" angle="181.221">
+					<from>SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>TOTAL_SURVEY_FLEET</to>
+				</connector>
+				<stock color="fuchsia" font_color="fuchsia" font_size="14pt" x="1599.27" y="3161.93" name="PROSPECT AREA FOR CORING"/>
+				<flow font_size="14pt" x="1498.31" y="3161.93" name="HI-RES SURVEY WITH\nDESIRABLE OUTCOME">
+					<pts>
+						<pt x="1419.86" y="3161.93"/>
+						<pt x="1576.77" y="3161.93"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" label_side="top" x="1599.26" y="3307.09" name="COMMERCIAL POTENTIAL DISCONFIRMATION AFTER CORING">
+					<pts>
+						<pt x="1766.67" y="3176.42"/>
+						<pt x="1766.67" y="3307.09"/>
+						<pt x="1419.86" y="3307.09"/>
+					</pts>
+				</flow>
+				<aux font_size="14pt" label_side="top" x="1357.42" y="2303.8" name="HI-RES SURVEY\nSPEED PER YEAR"/>
+				<aux font_size="14pt" label_side="right" x="1426.32" y="2303.8" name="HI-RES KTS CONVERTER"/>
+				<connector uid="241" angle="180">
+					<from>&quot;HI-RES_KTS_CONVERTER&quot;</from>
+					<to>&quot;HI-RES_SURVEY_SPEED_PER_YEAR&quot;</to>
+				</connector>
+				<aux font_size="14pt" label_side="right" x="1429.82" y="2352.58" name="HI-RES SURVEY SWATH"/>
+				<aux font_size="14pt" x="1357.42" y="2351.75" name="HI-RES SURVEY SHIP KM2/YEAR"/>
+				<connector uid="254" angle="179.34">
+					<from>&quot;HI-RES_SURVEY_SWATH&quot;</from>
+					<to>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</to>
+				</connector>
+				<connector uid="256" angle="275.913">
+					<from>&quot;HI-RES_SURVEY_SPEED_PER_YEAR&quot;</from>
+					<to>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</to>
+				</connector>
+				<aux font_size="14pt" label_side="bottom" x="1489.19" y="2969.41" name="PERCENTAGE OF HI-RES SURVEY\nAREA WITH DESIRABLE OUTCOME"/>
+				<aux font_size="14pt" label_side="left" x="1333.74" y="2969.18" name="STANDARD DEVIATION\nHI-RES SURVEY"/>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="left" x="1335.07" y="2920.43" name="EXPECTED PERCENTAGE OF HI-RES\nSURVEY AREA WITH\nDESIRABLE OUTCOME"/>
+				<aux font_size="14pt" label_side="left" x="1333.74" y="3005.18" name="SEED HI-RES SURVEY"/>
+				<connector uid="258" angle="342.369">
+					<from>&quot;EXPECTED_PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</from>
+					<to>&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</to>
+				</connector>
+				<connector uid="259" angle="359.915">
+					<from>&quot;STANDARD_DEVIATION_HI-RES_SURVEY&quot;</from>
+					<to>&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</to>
+				</connector>
+				<connector uid="260" angle="12.9578">
+					<from>&quot;SEED_HI-RES_SURVEY&quot;</from>
+					<to>&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</to>
+				</connector>
+				<stock font_size="14pt" x="953.937" y="3164.93" name="PROSPECT AREA UNDERGOING EVALUATION AFTER REGIONAL SURVEY"/>
+				<flow font_size="14pt" x="820.992" y="3164.93" name="REGIONAL SURVEY RATE">
+					<pts>
+						<pt x="710.547" y="3164.93"/>
+						<pt x="931.437" y="3164.93"/>
+					</pts>
+				</flow>
+				<connector uid="294" angle="33.9516">
+					<from>REGIONAL_SURVEY_RATE</from>
+					<to>REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="295" angle="334.901">
+					<from>REGIONAL_SURVEY_RATE</from>
+					<to>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="296" angle="339.069">
+					<from>PROSPECT_AREA_FOR_REGIONAL_SURVEY</from>
+					<to>REGIONAL_SURVEY_RATE</to>
+				</connector>
+				<stock font_size="14pt" label_side="top" x="1397.36" y="3160.68" name="PROSPECT AREA UNDERGOING\nEVALUATION AFTER HI-RES SURVEY"/>
+				<flow font_size="14pt" x="1301.86" y="3161.93" name="HI-RES SURVEY RATE">
+					<pts>
+						<pt x="1228.87" y="3161.93"/>
+						<pt x="1374.86" y="3161.93"/>
+					</pts>
+				</flow>
+				<connector uid="300" angle="41.4031">
+					<from>&quot;HI-RES_SURVEY_RATE&quot;</from>
+					<to>&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;</to>
+				</connector>
+				<connector uid="301" angle="321.096">
+					<from>&quot;HI-RES_SURVEY_RATE&quot;</from>
+					<to>&quot;COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_HI-RES_SURVEY&quot;</to>
+				</connector>
+				<connector uid="302" angle="20.1871">
+					<from>&quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;</from>
+					<to>&quot;HI-RES_SURVEY_RATE&quot;</to>
+				</connector>
+				<stock font_size="14pt" x="1765.42" y="3158.92" name="PROSPECT AREA UNDERGOING EVALUATION AFTER CORING"/>
+				<flow font_size="14pt" x="1682.34" y="3161.93" name="CORING RATE">
+					<pts>
+						<pt x="1621.77" y="3161.93"/>
+						<pt x="1742.92" y="3161.93"/>
+					</pts>
+				</flow>
+				<connector uid="305" angle="16.4107">
+					<from>CORING_RATE</from>
+					<to>CORING_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="308" angle="240.216">
+					<from>CORING_RATE</from>
+					<to>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_CORING</to>
+				</connector>
+				<connector uid="312" angle="26.2246">
+					<from>PROSPECT_AREA_FOR_CORING</from>
+					<to>CORING_RATE</to>
+				</connector>
+				<flow font_size="14pt" label_side="left" x="622.5" y="2263.54" name="SHIPS COMMITTED\nTO REGIONAL SURVEY SCRAPPING">
+					<pts>
+						<pt x="622.5" y="2196.83"/>
+						<pt x="622.5" y="2351.25"/>
+					</pts>
+				</flow>
+				<connector uid="337" angle="242.33">
+					<from>AVERAGE_LIFETIME_OF_REGIONAL_SURVEY_SHIPS</from>
+					<to>SHIPS_COMMITTED_TO_REGIONAL_SURVEY_SCRAPPING</to>
+				</connector>
+				<connector uid="338" angle="250.636">
+					<from>SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>SHIPS_COMMITTED_TO_REGIONAL_SURVEY_SCRAPPING</to>
+				</connector>
+				<aux color="#AA007F" font_color="#AA007F" font_size="14pt" label_side="left" x="3848.67" y="2523.95" name="PRICE BASIS"/>
+				<stock font_size="14pt" x="3956.83" y="2591.41" name="PRICE OF PROCESSED MINERALS IN END-MARKET"/>
+				<flow font_size="14pt" x="3848.66" y="2590.58" name="NET CHANGE IN PRICE">
+					<pts>
+						<pt x="3751" y="2590.58"/>
+						<pt x="3934.33" y="2590.58"/>
+					</pts>
+				</flow>
+				<connector uid="346" angle="330.876">
+					<from>PRICE_TREND_FACTOR</from>
+					<to>NET_CHANGE_IN_PRICE</to>
+				</connector>
+				<connector uid="348" angle="153.435">
+					<from>&quot;PRICE_OF_PROCESSED_MINERALS_IN_END-MARKET&quot;</from>
+					<to>NET_CHANGE_IN_PRICE</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3298.33" y="3238.54" name="ORE GRADE (MINERAL CONCENTRATION)"/>
+				<aux font_size="14pt" x="3962.08" y="2716.83" name="PRE-PROCESSED FACTOR FOR PRICE CALCULATION"/>
+				<aux font_size="14pt" x="3959.58" y="2660.58" name="PRE-PROCESSED PRICE"/>
+				<connector uid="350" angle="272.277">
+					<from>&quot;PRICE_OF_PROCESSED_MINERALS_IN_END-MARKET&quot;</from>
+					<to>&quot;PRE-PROCESSED_PRICE&quot;</to>
+				</connector>
+				<connector uid="352" angle="92.5448">
+					<from>&quot;PRE-PROCESSED_FACTOR_FOR_PRICE_CALCULATION&quot;</from>
+					<to>&quot;PRE-PROCESSED_PRICE&quot;</to>
+				</connector>
+				<connector uid="353" angle="0.0288426">
+					<from>&quot;PRE-PROCESSED_PRICE&quot;</from>
+					<to>REVENUE_RATE</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3755.83" y="2716.83" name="PROCESSING'S PERCENTAGE\nOF END-MARKET PRICE"/>
+				<connector uid="354" angle="0">
+					<from>&quot;PROCESSING&apos;S_PERCENTAGE_OF_END-MARKET_PRICE&quot;</from>
+					<to>&quot;PRE-PROCESSED_FACTOR_FOR_PRICE_CALCULATION&quot;</to>
+				</connector>
+				<aux font_size="14pt" label_side="bottom" x="3327.75" y="3309.59" name="COPPER, ZINC, COBALT\nMIX EXTRACTION"/>
+				<connector uid="355" angle="90">
+					<from>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</from>
+					<to>&quot;COPPER,_ZINC,_COBALT_MIX_EXTRACTION&quot;</to>
+				</connector>
+				<connector uid="356" angle="292.494">
+					<from>&quot;ORE_GRADE_(MINERAL_CONCENTRATION)&quot;</from>
+					<to>&quot;COPPER,_ZINC,_COBALT_MIX_EXTRACTION&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="3117.58" y="3238.54" name="PURE MINERAL STOCK"/>
+				<connector uid="359" angle="107.772">
+					<from>COMMERCIAL_MINERAL_STOCK</from>
+					<to>PURE_MINERAL_STOCK</to>
+				</connector>
+				<aux font_size="14pt" x="2946.67" y="3238.54" name="HYPOTHETICAL NONDISCOUNTED VALUE OF MINERAL STOCK"/>
+				<connector uid="361" angle="180">
+					<from>PURE_MINERAL_STOCK</from>
+					<to>HYPOTHETICAL_NONDISCOUNTED_VALUE_OF_MINERAL_STOCK</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3316.33" y="2633.58" name="BUILD COST PER PRODUCTION SUPPORT VESSEL"/>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3006.34" y="2642.33" name="YEARLY RATE FOR PRODUCTION SUPPORT VESSELS"/>
+				<stock color="#005500" font_color="#005500" font_size="14pt" x="2065.61" y="1871.74" name="AVAILABLE SHIPS FOR HI-RES, CORING AND EIA"/>
+				<stock font_size="14pt" x="1792.64" y="2088.96" name="SHIPS COMMITTED TO HI-RES"/>
+				<stock font_size="14pt" x="2063.36" y="2072.29" name="SHIPS COMMITTED TO CORING"/>
+				<flow font_size="14pt" x="2063.36" y="1972.01" name="CORING COMMISION RATE">
+					<pts>
+						<pt x="2063.36" y="1889.24"/>
+						<pt x="2063.36" y="2054.79"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="1911.88" y="1886.99" name="HI-RES COMMISION RATE">
+					<pts>
+						<pt x="2043.11" y="1886.99"/>
+						<pt x="1792.64" y="1886.99"/>
+						<pt x="1792.64" y="2071.46"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" label_side="right" x="2066.5" y="1475.05" name="SHIPS FOR\nHI-RES, CORING\nAND EIA BUILD ORDER RATE">
+					<pts>
+						<pt x="2066.5" y="1364"/>
+						<pt x="2066.5" y="1577.11"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" label_side="top" x="1877.55" y="1856.49" name="AVAILABLE SHIPS SCRAPPING">
+					<pts>
+						<pt x="2043.11" y="1856.49"/>
+						<pt x="1700" y="1856.49"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="1793.5" y="2187.8" name="SHIIPS COMMITTED TO HI-RES SCRAPPING">
+					<pts>
+						<pt x="1793.5" y="2106.46"/>
+						<pt x="1793.5" y="2278.13"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="2064.75" y="2183.84" name="SHIPS COMMITTED TO CORING SCRAPPING">
+					<pts>
+						<pt x="2064.75" y="2089.79"/>
+						<pt x="2064.75" y="2286.88"/>
+					</pts>
+				</flow>
+				<stock font_size="14pt" x="2347.01" y="2081.69" name="SHIPS COMMITTED TO EIA"/>
+				<aux font_size="14pt" x="1915.12" y="2552.58" name="DESIRED SHIPS COMMITTED TO CORING"/>
+				<aux font_size="14pt" x="1210.45" y="2638.02" name="DESIRED SHIPS COMMITTED TO HI-RES"/>
+				<aux font_size="14pt" x="2471.5" y="2655.54" name="DESIRED SHIPS COMMITTED TO EIA"/>
+				<flow font_size="14pt" x="2223.56" y="1886.99" name="EIA COMMISSION RATE">
+					<pts>
+						<pt x="2088.11" y="1886.99"/>
+						<pt x="2347.01" y="1886.99"/>
+						<pt x="2347.01" y="2064.19"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="2346" y="2191.66" name="SHIPS COMMITTED TO EIA SCRAPPING">
+					<pts>
+						<pt x="2346" y="2099.19"/>
+						<pt x="2346" y="2293.13"/>
+					</pts>
+				</flow>
+				<connector uid="366" angle="107.88">
+					<from>DESIRED_SHIPS_COMMITTED_TO_EIA</from>
+					<to>EIA_COMMISSION_RATE</to>
+				</connector>
+				<connector uid="367" angle="122.377">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>EIA_COMMISSION_RATE</to>
+				</connector>
+				<connector uid="368" angle="354.485">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>EIA_COMMISSION_RATE</to>
+				</connector>
+				<connector uid="369" angle="120.842">
+					<from>DESIRED_SHIPS_COMMITTED_TO_EIA</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<connector uid="370" angle="158.861">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<connector uid="371" angle="268.715">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<connector uid="372" angle="75.676">
+					<from>DESIRED_SHIPS_COMMITTED_TO_CORING</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<connector uid="373" angle="90">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<connector uid="374" angle="46.956">
+					<from>&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="375" angle="59.4441">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="376" angle="185.665">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="377" angle="129.266">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="378" angle="90.279">
+					<from>DESIRED_SHIPS_COMMITTED_TO_CORING</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="379" angle="155.894">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="380" angle="126.06">
+					<from>DESIRED_SHIPS_COMMITTED_TO_EIA</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="381" angle="23.3633">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="1437" y="2032.55" width="18" height="18" name="TOTAL DESIRED SHIPS FOR HI-RES, CORING AND EIA"/>
+				<connector uid="382" angle="68.4506">
+					<from>&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="383" angle="132.551">
+					<from>DESIRED_SHIPS_COMMITTED_TO_CORING</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="384" angle="149.09">
+					<from>DESIRED_SHIPS_COMMITTED_TO_EIA</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="385" angle="42.395">
+					<from>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</to>
+				</connector>
+				<aux font_size="14pt" label_side="left" x="1956.55" y="1611.21" name="TOTAL SHIPS FOR HI-RES, CORING AND EIA"/>
+				<connector uid="386" angle="71.063">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="387" angle="103.042">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="388" angle="129.69">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="389" angle="112.714">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="390" angle="51.0792">
+					<from>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="1895.17" y="1480.9" name="SURVEY SHIPS LEAD TIME"/>
+				<stock font_size="14pt" x="2066.52" y="1594.61" name="SHIPS FOR HI-RES, CORING AND EIA UNDER CONSTRUCTION"/>
+				<flow font_size="14pt" x="2068.5" y="1733.18" name="SHIPS FOR HI-RES, CORING AND EIA BUILD COMPLETION">
+					<pts>
+						<pt x="2068.5" y="1612.11"/>
+						<pt x="2068.5" y="1854.24"/>
+					</pts>
+				</flow>
+				<connector uid="391" angle="66.6845">
+					<from>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_UNDER_CONSTRUCTION&quot;</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</to>
+				</connector>
+				<connector uid="392" angle="316.901">
+					<from>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;</to>
+				</connector>
+				<connector uid="393" angle="304.492">
+					<from>SURVEY_SHIPS_LEAD_TIME</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="1895.17" y="1412.9" name="TIME TO COMPLETE DESIRED INVESTMENT"/>
+				<connector uid="394" angle="340.06">
+					<from>TIME_TO_COMPLETE_DESIRED_INVESTMENT</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="1418.63" y="1543.98" name="AVERAGE LIFETIME OF SHIPS FOR HI-RES, CORING AND EIA"/>
+				<connector uid="395" angle="270.499">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;SHIIPS_COMMITTED_TO_HI-RES_SCRAPPING&quot;</to>
+				</connector>
+				<connector uid="396" angle="269.842">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>SHIPS_COMMITTED_TO_CORING_SCRAPPING</to>
+				</connector>
+				<connector uid="397" angle="238.489">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>SHIPS_COMMITTED_TO_CORING_SCRAPPING</to>
+				</connector>
+				<connector uid="398" angle="271.088">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>SHIPS_COMMITTED_TO_EIA_SCRAPPING</to>
+				</connector>
+				<stock font_size="14pt" label_side="left" x="1596.62" y="1653.95" name="SHIPS DUE FOR SCRAPPING"/>
+				<flow font_size="14pt" x="1600" y="1543.98" name="SHIPS CLOSING UP TO END OF LIFETIME">
+					<pts>
+						<pt x="1600" y="1442.5"/>
+						<pt x="1600" y="1636.45"/>
+					</pts>
+				</flow>
+				<connector uid="399" angle="158.009">
+					<from>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;</from>
+					<to>SHIPS_CLOSING_UP_TO_END_OF_LIFETIME</to>
+				</connector>
+				<connector uid="400" angle="0.00157953">
+					<from>&quot;AVERAGE_LIFETIME_OF_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>SHIPS_CLOSING_UP_TO_END_OF_LIFETIME</to>
+				</connector>
+				<flow font_size="14pt" x="1596.62" y="1743.1" name="TOTAL SHIPS FOR HI-RES, CORING AND EIA\nSCRAPPING RATE">
+					<pts>
+						<pt x="1596.62" y="1671.45"/>
+						<pt x="1596.62" y="1814.74"/>
+					</pts>
+				</flow>
+				<aux font_size="14pt" x="1713.52" y="1653.95" name="NUMBERS OF SHIPS TO SCRAP"/>
+				<connector uid="401" angle="175.364">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>AVAILABLE_SHIPS_SCRAPPING</to>
+				</connector>
+				<connector uid="402" angle="309.004">
+					<from>NUMBERS_OF_SHIPS_TO_SCRAP</from>
+					<to>AVAILABLE_SHIPS_SCRAPPING</to>
+				</connector>
+				<connector uid="403" angle="278.521">
+					<from>NUMBERS_OF_SHIPS_TO_SCRAP</from>
+					<to>&quot;SHIIPS_COMMITTED_TO_HI-RES_SCRAPPING&quot;</to>
+				</connector>
+				<connector uid="404" angle="229.273">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>&quot;SHIIPS_COMMITTED_TO_HI-RES_SCRAPPING&quot;</to>
+				</connector>
+				<connector uid="405" angle="340.778">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>SHIPS_COMMITTED_TO_CORING_SCRAPPING</to>
+				</connector>
+				<connector uid="406" angle="298.03">
+					<from>NUMBERS_OF_SHIPS_TO_SCRAP</from>
+					<to>SHIPS_COMMITTED_TO_CORING_SCRAPPING</to>
+				</connector>
+				<connector uid="407" angle="311.233">
+					<from>&quot;AVAILABLE_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>SHIPS_COMMITTED_TO_EIA_SCRAPPING</to>
+				</connector>
+				<connector uid="408" angle="349.486">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>SHIPS_COMMITTED_TO_EIA_SCRAPPING</to>
+				</connector>
+				<connector uid="409" angle="337.103">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>SHIPS_COMMITTED_TO_EIA_SCRAPPING</to>
+				</connector>
+				<connector uid="410" angle="319.63">
+					<from>NUMBERS_OF_SHIPS_TO_SCRAP</from>
+					<to>SHIPS_COMMITTED_TO_EIA_SCRAPPING</to>
+				</connector>
+				<connector uid="411" angle="136.726">
+					<from>SHIPS_COMMITTED_TO_CORING_SCRAPPING</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA_SCRAPPING_RATE&quot;</to>
+				</connector>
+				<connector uid="412" angle="149.096">
+					<from>SHIPS_COMMITTED_TO_EIA_SCRAPPING</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA_SCRAPPING_RATE&quot;</to>
+				</connector>
+				<connector uid="413" angle="113.88">
+					<from>&quot;SHIIPS_COMMITTED_TO_HI-RES_SCRAPPING&quot;</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA_SCRAPPING_RATE&quot;</to>
+				</connector>
+				<connector uid="414" angle="158.019">
+					<from>AVAILABLE_SHIPS_SCRAPPING</from>
+					<to>&quot;TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA_SCRAPPING_RATE&quot;</to>
+				</connector>
+				<connector uid="415" angle="0">
+					<from>SHIPS_DUE_FOR_SCRAPPING</from>
+					<to>NUMBERS_OF_SHIPS_TO_SCRAP</to>
+				</connector>
+				<stock font_size="14pt" label_side="left" x="1596.62" y="1832.24" name="SCRAPPED NUMBER OF SHIPS"/>
+				<stock font_size="14pt" x="1763" y="1295.21" name="SHIPS AT REPLACEMENT DATE"/>
+				<flow font_size="14pt" x="1605" y="1290.83" name="SHIPS DUE FOR REPLACEMENT">
+					<pts>
+						<pt x="1457.5" y="1290.83"/>
+						<pt x="1740.5" y="1290.83"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="1935.5" y="1287.5" name="SHIPS REPLACED OR OVER DUE DATE FOR REPLACEMENT">
+					<pts>
+						<pt x="1785.5" y="1287.5"/>
+						<pt x="2097.5" y="1287.5"/>
+					</pts>
+				</flow>
+				<connector uid="416" angle="136.338">
+					<from>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_COMPLETION&quot;</from>
+					<to>SHIPS_DUE_FOR_REPLACEMENT</to>
+				</connector>
+				<connector uid="417" angle="53.6385">
+					<from>&quot;AVERAGE_LIFETIME_OF_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</from>
+					<to>SHIPS_DUE_FOR_REPLACEMENT</to>
+				</connector>
+				<connector uid="418" angle="52.2659">
+					<from>SHIPS_DUE_FOR_REPLACEMENT</from>
+					<to>SHIPS_REPLACED_OR_OVER_DUE_DATE_FOR_REPLACEMENT</to>
+				</connector>
+				<connector uid="419" angle="146.775">
+					<from>SURVEY_SHIPS_LEAD_TIME</from>
+					<to>SHIPS_DUE_FOR_REPLACEMENT</to>
+				</connector>
+				<connector uid="420" angle="329.35">
+					<from>SHIPS_AT_REPLACEMENT_DATE</from>
+					<to>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</to>
+				</connector>
+				<stock font_size="14pt" x="3117.25" y="1989.11" name="HI-RES, CORING, EIA CAPEX"/>
+				<flow font_size="14pt" x="3006.75" y="1983.75" name="EXPLORATION CAPEX RATE">
+					<pts>
+						<pt x="2918.75" y="1983.75"/>
+						<pt x="3094.75" y="1983.75"/>
+					</pts>
+				</flow>
+				<aux font_size="14pt" x="3006.75" y="2034.47" name="AVERAGE COST OF NEW HI-RES, CORING, EIA SHIP"/>
+				<connector uid="421" angle="90">
+					<from>&quot;AVERAGE_COST_OF_NEW_HI-RES,_CORING,_EIA_SHIP&quot;</from>
+					<to>EXPLORATION_CAPEX_RATE</to>
+				</connector>
+				<connector uid="422" angle="331.586">
+					<from>&quot;SHIPS_FOR_HI-RES,_CORING_AND_EIA_BUILD_ORDER_RATE&quot;</from>
+					<to>EXPLORATION_CAPEX_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="2775.25" y="2332.55" name="YEARLY RATE FOR EIA SHIP"/>
+				<aux font_size="14pt" x="2770.25" y="2186.96" name="YEARLY RATE FOR CORING SHIP"/>
+				<aux font_size="14pt" x="2764.93" y="2038.21" name="YEARLY RATE FOR HI-RES SHIP"/>
+				<stock font_size="14pt" x="2862.36" y="2130.83" name="HI-RES OPEX"/>
+				<stock font_size="14pt" x="2873.75" y="2271.58" name="CORING OPEX"/>
+				<stock font_size="14pt" x="2856.5" y="2404.83" name="EIA OPEX"/>
+				<flow font_size="14pt" x="2770.93" y="2127.83" name="HI-RES OPEX RATE">
+					<pts>
+						<pt x="2690" y="2127.83"/>
+						<pt x="2839.86" y="2127.83"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="2771" y="2265" name="CORING OPEX RATE">
+					<pts>
+						<pt x="2678.75" y="2265"/>
+						<pt x="2851.25" y="2265"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="2775.25" y="2402.83" name="EIA OPEX RATE">
+					<pts>
+						<pt x="2704.5" y="2402.83"/>
+						<pt x="2834" y="2402.83"/>
+					</pts>
+				</flow>
+				<connector uid="423" angle="357.725">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;HI-RES_OPEX_RATE&quot;</to>
+				</connector>
+				<connector uid="424" angle="273.83">
+					<from>&quot;YEARLY_RATE_FOR_HI-RES_SHIP&quot;</from>
+					<to>&quot;HI-RES_OPEX_RATE&quot;</to>
+				</connector>
+				<connector uid="425" angle="270.551">
+					<from>YEARLY_RATE_FOR_CORING_SHIP</from>
+					<to>CORING_OPEX_RATE</to>
+				</connector>
+				<connector uid="426" angle="270">
+					<from>YEARLY_RATE_FOR_EIA_SHIP</from>
+					<to>EIA_OPEX_RATE</to>
+				</connector>
+				<stock font_size="14pt" x="3192.5" y="2243.87" name="HI-RES, CORING, EIA OPEX"/>
+				<flow font_size="14pt" x="3094.13" y="2238.75" name="EXPLORATION OPEX RATE">
+					<pts>
+						<pt x="3006.25" y="2238.75"/>
+						<pt x="3170" y="2238.75"/>
+					</pts>
+				</flow>
+				<connector uid="427" angle="341.058">
+					<from>&quot;HI-RES_OPEX_RATE&quot;</from>
+					<to>EXPLORATION_OPEX_RATE</to>
+				</connector>
+				<connector uid="428" angle="4.64439">
+					<from>CORING_OPEX_RATE</from>
+					<to>EXPLORATION_OPEX_RATE</to>
+				</connector>
+				<connector uid="429" angle="27.2285">
+					<from>EIA_OPEX_RATE</from>
+					<to>EXPLORATION_OPEX_RATE</to>
+				</connector>
+				<connector uid="430" angle="344.766">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>CORING_OPEX_RATE</to>
+				</connector>
+				<connector uid="431" angle="323.134">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>EIA_OPEX_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="1691.5" y="1466.75" name="INITIAL AVAILABLE SHIPS"/>
+				<connector uid="432" angle="220.164">
+					<from>INITIAL_AVAILABLE_SHIPS</from>
+					<to>SHIPS_CLOSING_UP_TO_END_OF_LIFETIME</to>
+				</connector>
+				<connector uid="433" angle="270">
+					<from>
+						<alias uid="434"/>
+					</from>
+					<to>SHIPS_DUE_FOR_REPLACEMENT</to>
+				</connector>
+				<aux font_size="14pt" x="1728" y="1529.61" name="INITIAL SCRAPPING DATE"/>
+				<connector uid="435" angle="186.403">
+					<from>INITIAL_SCRAPPING_DATE</from>
+					<to>SHIPS_CLOSING_UP_TO_END_OF_LIFETIME</to>
+				</connector>
+				<connector uid="437" angle="250.727">
+					<from>SHIPS_COMMITTED_TO_CORING</from>
+					<to>CORING_RATE</to>
+				</connector>
+				<stock font_size="14pt" x="2277.5" y="3158.88" name="AREA WITH CONFIRMED ORE UNDERGOING EVALUATION AFTER EIA"/>
+				<flow font_size="14pt" x="2153.16" y="3158.88" name="EIA RATE">
+					<pts>
+						<pt x="2051.32" y="3158.88"/>
+						<pt x="2255" y="3158.88"/>
+					</pts>
+				</flow>
+				<stock font_size="14pt" x="2516.67" y="3158.88" name="EIA APPROVED AREA WITH CONFIRMED ORE"/>
+				<flow font_size="14pt" x="2397.08" y="3158.88" name="EIA APPROVAL RATE">
+					<pts>
+						<pt x="2300" y="3158.88"/>
+						<pt x="2494.17" y="3158.88"/>
+					</pts>
+				</flow>
+				<connector uid="440" angle="28.6526">
+					<from>AREA_WITH_CONFIRMED_ORE</from>
+					<to>EIA_RATE</to>
+				</connector>
+				<flow font_size="14pt" x="1856.76" y="3325.42" name="EIA DISAPPROVAL RATE">
+					<pts>
+						<pt x="2281.67" y="3176.38"/>
+						<pt x="2281.67" y="3325.42"/>
+						<pt x="1419.86" y="3325.42"/>
+					</pts>
+				</flow>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="bottom" x="2400.42" y="3268.56" name="PERCENTAGE OF AREA WITH CONFIRMED ORE RECEIVING EIA APPROVAL"/>
+				<connector uid="445" angle="91.7416">
+					<from>PERCENTAGE_OF_AREA_WITH_CONFIRMED_ORE_RECEIVING_EIA_APPROVAL</from>
+					<to>EIA_APPROVAL_RATE</to>
+				</connector>
+				<connector uid="446" angle="185.971">
+					<from>PERCENTAGE_OF_AREA_WITH_CONFIRMED_ORE_RECEIVING_EIA_APPROVAL</from>
+					<to>EIA_DISAPPROVAL_RATE</to>
+				</connector>
+				<connector uid="447" angle="25.1312">
+					<from>EIA_RATE</from>
+					<to>EIA_APPROVAL_RATE</to>
+				</connector>
+				<connector uid="448" angle="209.331">
+					<from>EIA_RATE</from>
+					<to>EIA_DISAPPROVAL_RATE</to>
+				</connector>
+				<connector uid="450" angle="245.42">
+					<from>&quot;SHIPS_COMMITTED_TO_HI-RES&quot;</from>
+					<to>&quot;HI-RES_SURVEY_RATE&quot;</to>
+				</connector>
+				<connector uid="451" angle="266.077">
+					<from>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>&quot;HI-RES_SURVEY_RATE&quot;</to>
+				</connector>
+				<connector uid="452" angle="259.798">
+					<from>SHIPS_COMMITTED_TO_EIA</from>
+					<to>EIA_RATE</to>
+				</connector>
+				<connector uid="453" angle="314.593">
+					<from>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>EIA_RATE</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="2326.85" y="2706.83" name="EIA AREA AMPLIFIER"/>
+				<connector uid="454" angle="248.981">
+					<from>EIA_AREA_AMPLIFIER</from>
+					<to>EIA_RATE</to>
+				</connector>
+				<connector uid="457" angle="339.482">
+					<from>EIA_APPROVAL_RATE</from>
+					<to>COMMERCIAL_ORE_DISCOVERY</to>
+				</connector>
+				<connector uid="462" angle="212.645">
+					<from>&quot;PRICE_OF_PROCESSED_MINERALS_IN_END-MARKET&quot;</from>
+					<to>HYPOTHETICAL_NONDISCOUNTED_VALUE_OF_MINERAL_STOCK</to>
+				</connector>
+				<connector uid="463" angle="38.1677">
+					<from>&quot;ORE_GRADE_(MINERAL_CONCENTRATION)&quot;</from>
+					<to>&quot;PRE-PROCESSED_FACTOR_FOR_PRICE_CALCULATION&quot;</to>
+				</connector>
+				<connector uid="464" angle="30.2292">
+					<from>COMMERCIAL_MINERAL_STOCK</from>
+					<to>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</to>
+				</connector>
+				<stock font_size="14pt" label_side="bottom" x="3051.87" y="3068.92" name="COMMITTED MINING FLEET"/>
+				<flow font_size="14pt" label_side="right" x="3051.27" y="2964.25" name="MINING FLEET COMMISSION RATE">
+					<pts>
+						<pt x="3051.27" y="2877.08"/>
+						<pt x="3051.27" y="3051.42"/>
+					</pts>
+				</flow>
+				<connector uid="465" angle="310.817">
+					<from>COMMITTED_MINING_FLEET</from>
+					<to>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</to>
+				</connector>
+				<aux font_size="14pt" x="3707.25" y="3073.92" name="DESIRED TOTAL COMMITTED MINING FLEET"/>
+				<aux font_size="14pt" x="3322" y="3073.92" name="TOTAL MINING FLEET"/>
+				<connector uid="466" angle="322.201">
+					<from>AVAILABLE_MINING_FLEET</from>
+					<to>TOTAL_MINING_FLEET</to>
+				</connector>
+				<connector uid="467" angle="358.94">
+					<from>COMMITTED_MINING_FLEET</from>
+					<to>TOTAL_MINING_FLEET</to>
+				</connector>
+				<aux font_size="14pt" x="3502.75" y="3079.17" name="MINING FLEET GAP"/>
+				<connector uid="469" angle="181.47">
+					<from>DESIRED_TOTAL_COMMITTED_MINING_FLEET</from>
+					<to>MINING_FLEET_GAP</to>
+				</connector>
+				<flow font_size="14pt" x="2876.69" y="3068.33" name="COMMITTED MINING FLEET SCRAPPING">
+					<pts>
+						<pt x="3029.37" y="3068.33"/>
+						<pt x="2700" y="3068.33"/>
+					</pts>
+				</flow>
+				<connector uid="470" angle="270">
+					<from>AVERAGE_LIFETIME_OF_MINING_FLEET</from>
+					<to>COMMITTED_MINING_FLEET_SCRAPPING</to>
+				</connector>
+				<aux font_size="14pt" x="3398.58" y="3193.12" name="DESIRED PRODUCTION"/>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3735.58" y="3270.85" name="EXTRACTION PER MINING FLEET UNIT PER YEAR"/>
+				<connector uid="472" angle="21.116">
+					<from>DESIRED_PRODUCTION</from>
+					<to>DESIRED_TOTAL_COMMITTED_MINING_FLEET</to>
+				</connector>
+				<connector uid="473" angle="98.1863">
+					<from>EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR</from>
+					<to>DESIRED_TOTAL_COMMITTED_MINING_FLEET</to>
+				</connector>
+				<connector uid="474" angle="39.8003">
+					<from>COMMERCIAL_MINERAL_STOCK</from>
+					<to>DESIRED_PRODUCTION</to>
+				</connector>
+				<aux color="black" font_weight="bold" font_color="black" font_size="14pt" x="3504.96" y="3271.56" name="DESIRED PRODUCTION/COMMERCIAL\nMINERAL STOCK"/>
+				<connector uid="475" angle="143.598">
+					<from>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;</from>
+					<to>DESIRED_PRODUCTION</to>
+				</connector>
+				<connector uid="476" angle="89.4402">
+					<from>MINING_FLEET_GAP</from>
+					<to>MINING_UNIT_BUILD_ORDER_RATE</to>
+				</connector>
+				<connector uid="477" angle="273.065">
+					<from>AVAILABLE_MINING_FLEET</from>
+					<to>MINING_FLEET_COMMISSION_RATE</to>
+				</connector>
+				<connector uid="480" angle="196.069">
+					<from>EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR</from>
+					<to>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</to>
+				</connector>
+				<connector uid="483" angle="144.224">
+					<from>MINING_UNIT_BUILD_ORDER_RATE</from>
+					<to>BUILD_COMPLETION_RATE_OF_MINING_UNIT</to>
+				</connector>
+				<connector uid="484" angle="63.966">
+					<from>AVAILABLE_MINING_FLEET_SCRAPPING</from>
+					<to>MINING_UNIT_BUILD_ORDER_RATE</to>
+				</connector>
+				<connector uid="485" angle="18.8914">
+					<from>COMMITTED_MINING_FLEET_SCRAPPING</from>
+					<to>MINING_UNIT_BUILD_ORDER_RATE</to>
+				</connector>
+				<stock font_size="14pt" x="3405.17" y="2574.25" name="MINING CAPEX"/>
+				<stock font_size="14pt" x="3085.17" y="2583.75" name="MINING OPEX"/>
+				<flow font_size="14pt" x="3316.33" y="2574.25" name="MINING CAPEX RATE">
+					<pts>
+						<pt x="3238" y="2574.25"/>
+						<pt x="3382.67" y="2574.25"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="3001.33" y="2578.75" name="MINING OPEX RATE">
+					<pts>
+						<pt x="2928" y="2578.75"/>
+						<pt x="3062.67" y="2578.75"/>
+					</pts>
+				</flow>
+				<connector uid="486" angle="90">
+					<from>BUILD_COST_PER_PRODUCTION_SUPPORT_VESSEL</from>
+					<to>MINING_CAPEX_RATE</to>
+				</connector>
+				<connector uid="487" angle="124.053">
+					<from>MINING_UNIT_BUILD_ORDER_RATE</from>
+					<to>MINING_CAPEX_RATE</to>
+				</connector>
+				<connector uid="488" angle="94.5055">
+					<from>YEARLY_RATE_FOR_PRODUCTION_SUPPORT_VESSELS</from>
+					<to>MINING_OPEX_RATE</to>
+				</connector>
+				<connector uid="489" angle="95.8866">
+					<from>COMMITTED_MINING_FLEET</from>
+					<to>MINING_OPEX_RATE</to>
+				</connector>
+				<stock font_size="14pt" x="3993.75" y="2196.25" name="DISCOUNTED PROFITS"/>
+				<flow font_size="14pt" label_side="bottom" x="3889.75" y="2198.75" name="DISCOUNTED PROFIT RATE">
+					<pts>
+						<pt x="3796.25" y="2198.75"/>
+						<pt x="3971.25" y="2198.75"/>
+					</pts>
+				</flow>
+				<connector uid="490" angle="116.354">
+					<from>REVENUE_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<connector uid="491" angle="33.2187">
+					<from>MINING_CAPEX_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<connector uid="492" angle="23.1578">
+					<from>MINING_OPEX_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3889.75" y="2059.75" name="DISCOUNT RATE"/>
+				<aux font_size="14pt" x="3889.75" y="2125.58" name="DISCOUNT FACTOR"/>
+				<connector uid="493" angle="270">
+					<from>DISCOUNT_RATE</from>
+					<to>DISCOUNT_FACTOR</to>
+				</connector>
+				<connector uid="494" angle="270">
+					<from>DISCOUNT_FACTOR</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<connector uid="496" angle="346.315">
+					<from>EXPLORATION_CAPEX_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<connector uid="497" angle="2.87812">
+					<from>EXPLORATION_OPEX_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="1215.95" y="2706.83" name="DESIRED AREA COVERED BY HI-RES"/>
+				<connector uid="498" angle="88.7937">
+					<from>&quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;</from>
+					<to>&quot;DESIRED_AREA_COVERED_BY_HI-RES&quot;</to>
+				</connector>
+				<connector uid="499" angle="94.5699">
+					<from>&quot;DESIRED_AREA_COVERED_BY_HI-RES&quot;</from>
+					<to>&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;</to>
+				</connector>
+				<connector uid="500" angle="242.824">
+					<from>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>&quot;DESIRED_SHIPS_COMMITTED_TO_HI-RES&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="1915.1" y="2693.13" name="DESIRED AREA COVERED CORING"/>
+				<connector uid="501" angle="56.0311">
+					<from>PROSPECT_AREA_FOR_CORING</from>
+					<to>DESIRED_AREA_COVERED_CORING</to>
+				</connector>
+				<connector uid="502" angle="89.9946">
+					<from>DESIRED_AREA_COVERED_CORING</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_CORING</to>
+				</connector>
+				<connector uid="503" angle="17.658">
+					<from>AREA_CONCLUDED_PER_CORING_CAMPAIGN</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_CORING</to>
+				</connector>
+				<aux font_size="14pt" label_side="right" x="2473" y="2734.08" name="DESIRED AREA COVERED EIA"/>
+				<connector uid="504" angle="43.4682">
+					<from>AREA_WITH_CONFIRMED_ORE</from>
+					<to>DESIRED_AREA_COVERED_EIA</to>
+				</connector>
+				<connector uid="505" angle="91.0941">
+					<from>DESIRED_AREA_COVERED_EIA</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_EIA</to>
+				</connector>
+				<connector uid="506" angle="344.747">
+					<from>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_EIA</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="right" label_angle="315" x="1736.81" y="2626.68" name="MAXIMUM NUMBER OF CORING CAMPAIGNS PER SHIP PER YEAR"/>
+				<connector uid="509" angle="264.189">
+					<from>MAXIMUM_NUMBER_OF_CORING_CAMPAIGNS_PER_SHIP_PER_YEAR</from>
+					<to>CORING_RATE</to>
+				</connector>
+				<connector uid="511" angle="19.5235">
+					<from>EIA_AREA_AMPLIFIER</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_EIA</to>
+				</connector>
+				<connector uid="513" angle="22.5666">
+					<from>MAXIMUM_NUMBER_OF_CORING_CAMPAIGNS_PER_SHIP_PER_YEAR</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_CORING</to>
+				</connector>
+				<aux color="black" font_weight="bold" font_color="black" font_size="14pt" label_side="bottom" x="1027.23" y="2757" name="DESIRED SHARE OF TOTAL HI-RES AREA COVERED BY HI-RES PER YEAR"/>
+				<aux color="black" font_weight="bold" font_color="black" font_size="14pt" label_side="bottom" x="1706.31" y="2753.13" name="DESIRED SHARE OF TOTAL CORING AREA COVERED BY CORING PER YEAR"/>
+				<connector uid="517" angle="16.0328">
+					<from>DESIRED_SHARE_OF_TOTAL_CORING_AREA_COVERED_BY_CORING_PER_YEAR</from>
+					<to>DESIRED_AREA_COVERED_CORING</to>
+				</connector>
+				<aux color="black" font_weight="bold" font_color="black" font_size="14pt" label_side="bottom" x="2326.85" y="2797.55" name="DESIRED SHARE OF TOTAL EIA AREA COVERED BY EIA PER YEAR"/>
+				<connector uid="518" angle="23.4754">
+					<from>DESIRED_SHARE_OF_TOTAL_EIA_AREA_COVERED_BY_EIA_PER_YEAR</from>
+					<to>DESIRED_AREA_COVERED_EIA</to>
+				</connector>
+				<aux font_size="14pt" x="567.5" y="2786.05" name="DESIRED REGIONAL\nSURVEY RATE"/>
+				<connector uid="520" angle="107.837">
+					<from>PROSPECT_AREA_FOR_REGIONAL_SURVEY</from>
+					<to>DESIRED_REGIONAL_SURVEY_RATE</to>
+				</connector>
+				<aux color="black" font_weight="bold" font_color="black" font_size="14pt" label_side="bottom" x="364.25" y="2786.05" name="DESIRED SHARE OF TOTAL REGIONAL\nSURVEY AREA COVERED BY REGIONAL\nSURVEY PER YEAR"/>
+				<connector uid="521" angle="0">
+					<from>DESIRED_SHARE_OF_TOTAL_REGIONAL_SURVEY_AREA_COVERED_BY_REGIONAL_SURVEY_PER_YEAR</from>
+					<to>DESIRED_REGIONAL_SURVEY_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="418.75" y="2469.33" name="DESIRED SHIPS COMMITTED\nTO REGIONAL SURVEY"/>
+				<connector uid="522" angle="115.157">
+					<from>DESIRED_REGIONAL_SURVEY_RATE</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="523" angle="179.382">
+					<from>&quot;REGIONAL_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY</to>
+				</connector>
+				<aux font_size="14pt" x="219.833" y="2173.55" name="SURVEY FLEET GAP"/>
+				<connector uid="525" angle="132.91">
+					<from>SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>COMISSION_RATE_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="526" angle="80.361">
+					<from>DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>COMISSION_RATE_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="527" angle="244.811">
+					<from>AVAILABLE_REGIONAL_SURVEY_SHIPS</from>
+					<to>COMISSION_RATE_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="528" angle="123.921">
+					<from>DESIRED_SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>SURVEY_FLEET_GAP</to>
+				</connector>
+				<connector uid="529" angle="180">
+					<from>TOTAL_SURVEY_FLEET</from>
+					<to>SURVEY_FLEET_GAP</to>
+				</connector>
+				<connector uid="530" angle="67.604">
+					<from>SURVEY_FLEET_GAP</from>
+					<to>REGIONAL_SURVEY_BUILD_ORDER_RATE</to>
+				</connector>
+				<stock font_size="14pt" x="3618.75" y="1796.25" name="REGIONAL SURVEY CAPEX"/>
+				<stock font_size="14pt" x="3618.75" y="1903.75" name="REGIONAL SURVEY OPEX"/>
+				<flow font_size="14pt" x="3480.37" y="1788.75" name="REGIONAL SURVEY CAPEX RATE">
+					<pts>
+						<pt x="3352.5" y="1788.75"/>
+						<pt x="3596.25" y="1788.75"/>
+					</pts>
+				</flow>
+				<flow font_size="14pt" x="3485.37" y="1906.58" name="REGIONAL SURVEY OPEX RATE">
+					<pts>
+						<pt x="3362.5" y="1906.58"/>
+						<pt x="3596.25" y="1906.58"/>
+					</pts>
+				</flow>
+				<aux font_size="14pt" label_side="top" x="3452.86" y="1727.58" name="AVERAGE COST OF REGIONAL\nSURVEY SHIP"/>
+				<connector uid="532" angle="294.219">
+					<from>AVERAGE_COST_OF_REGIONAL_SURVEY_SHIP</from>
+					<to>REGIONAL_SURVEY_CAPEX_RATE</to>
+				</connector>
+				<connector uid="534" angle="3.52288">
+					<from>REGIONAL_SURVEY_BUILD_ORDER_RATE</from>
+					<to>REGIONAL_SURVEY_CAPEX_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="3456.63" y="1967.8" name="YEARLY RATE OF\nREGIONAL SURVEY SHIP"/>
+				<connector uid="535" angle="64.8482">
+					<from>YEARLY_RATE_OF_REGIONAL_SURVEY_SHIP</from>
+					<to>REGIONAL_SURVEY_OPEX_RATE</to>
+				</connector>
+				<connector uid="536" angle="5.21977">
+					<from>SHIPS_COMMITTED_TO_REGIONAL_SURVEY</from>
+					<to>REGIONAL_SURVEY_OPEX_RATE</to>
+				</connector>
+				<connector uid="537" angle="314.956">
+					<from>REGIONAL_SURVEY_CAPEX_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<connector uid="538" angle="324.151">
+					<from>REGIONAL_SURVEY_OPEX_RATE</from>
+					<to>DISCOUNTED_PROFIT_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="2114.09" y="3520.25" width="58" height="58" name="STOCHASTIC SWITCH"/>
+				<connector uid="539" angle="155.579">
+					<from>STOCHASTIC_SWITCH</from>
+					<to>STANDARD_DEVIATION_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="540" angle="144.371">
+					<from>STOCHASTIC_SWITCH</from>
+					<to>&quot;STANDARD_DEVIATION_HI-RES_SURVEY&quot;</to>
+				</connector>
+				<connector uid="541" angle="122.957">
+					<from>STOCHASTIC_SWITCH</from>
+					<to>STANDARD_DEVIATION_CORING</to>
+				</connector>
+				<aux font_size="14pt" x="1232.67" y="2032.55" width="18" height="18" name="DESIRED AVAILABLE SHIPS"/>
+				<connector uid="561" angle="0">
+					<from>DESIRED_AVAILABLE_SHIPS</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="3386" y="2196.61" name="TOTAL CAPEX"/>
+				<aux font_size="14pt" x="3396" y="2325.08" name="TOTAL OPEX"/>
+				<connector uid="562" angle="338.245">
+					<from>&quot;HI-RES,_CORING,_EIA_OPEX&quot;</from>
+					<to>TOTAL_OPEX</to>
+				</connector>
+				<connector uid="563" angle="242.135">
+					<from>REGIONAL_SURVEY_OPEX</from>
+					<to>TOTAL_OPEX</to>
+				</connector>
+				<connector uid="564" angle="322.329">
+					<from>&quot;HI-RES,_CORING,_EIA_CAPEX&quot;</from>
+					<to>TOTAL_CAPEX</to>
+				</connector>
+				<connector uid="565" angle="239.828">
+					<from>REGIONAL_SURVEY_CAPEX</from>
+					<to>TOTAL_CAPEX</to>
+				</connector>
+				<connector uid="566" angle="92.906">
+					<from>MINING_CAPEX</from>
+					<to>TOTAL_CAPEX</to>
+				</connector>
+				<connector uid="567" angle="39.7669">
+					<from>MINING_OPEX</from>
+					<to>TOTAL_OPEX</to>
+				</connector>
+				<connector uid="574" angle="129.372">
+					<from>COMMITTED_MINING_FLEET</from>
+					<to>MINING_FLEET_COMMISSION_RATE</to>
+				</connector>
+				<connector uid="575" angle="170.509">
+					<from>DESIRED_TOTAL_COMMITTED_MINING_FLEET</from>
+					<to>MINING_FLEET_COMMISSION_RATE</to>
+				</connector>
+				<aux color="#005500" font_color="#005500" font_size="14pt" x="3735.58" y="3349.6" name="OPERATIONAL EFFICIENCY"/>
+				<connector uid="579" angle="90">
+					<from>OPERATIONAL_EFFICIENCY</from>
+					<to>EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR</to>
+				</connector>
+				<aux font_size="14pt" label_side="bottom" x="2881.75" y="3639.19" name="STANDARD DEVIATION OCCURENCE"/>
+				<aux color="#005500" font_color="#005500" font_size="14pt" label_side="bottom" x="3157.28" y="3639.19" name="EXPECTED AVERAGE MILLION TONS\nORE PER KM2 PER DISCOVERY"/>
+				<aux font_size="14pt" label_side="bottom" x="3015.75" y="3590.86" name="SEED OCCURENCE"/>
+				<aux font_size="14pt" label_side="bottom" x="3006.17" y="3469.33" name="AVERAGE MILLION TONS\nORE PER KM2 PER DISCOVERY"/>
+				<connector uid="585" angle="353.058">
+					<from>STOCHASTIC_SWITCH</from>
+					<to>STANDARD_DEVIATION_OCCURENCE</to>
+				</connector>
+				<connector uid="586" angle="131.657">
+					<from>EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</from>
+					<to>AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</to>
+				</connector>
+				<connector uid="587" angle="53.7778">
+					<from>STANDARD_DEVIATION_OCCURENCE</from>
+					<to>AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</to>
+				</connector>
+				<connector uid="588" angle="94.5058">
+					<from>SEED_OCCURENCE</from>
+					<to>AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</to>
+				</connector>
+				<aux font_size="14pt" x="846.813" y="2644.68" name="EXPECTED DESIRED SHIPS\nFOR HI-RES IN TWO YEARS"/>
+				<connector uid="602" angle="209.842">
+					<from>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>&quot;EXPECTED_DESIRED_SHIPS_FOR_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="842.664" y="2706.08" name="EXPECTED DESIRED AREA COVERED BY HI-RES IN TWO YEARS"/>
+				<connector uid="606" angle="135.21">
+					<from>&quot;HI-RES_SURVEY_RATE&quot;</from>
+					<to>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<connector uid="604" angle="128.585">
+					<from>&quot;PROSPECT_AREA_FOR_HI-RES_SURVEY&quot;</from>
+					<to>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<connector uid="603" angle="86.1339">
+					<from>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</from>
+					<to>&quot;EXPECTED_DESIRED_SHIPS_FOR_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<connector uid="601" angle="164.577">
+					<from>&quot;DESIRED_SHARE_OF_TOTAL_HI-RES_AREA_COVERED_BY_HI-RES_PER_YEAR&quot;</from>
+					<to>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="1522.19" y="2693.13" name="EXPECTED DESIRED AREA COVERED BY CORING IN TWO YEARS"/>
+				<connector uid="610" angle="99.3367">
+					<from>PROSPECT_AREA_FOR_CORING</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="611" angle="108.861">
+					<from>CORING_RATE</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="614" angle="161.951">
+					<from>DESIRED_SHARE_OF_TOTAL_CORING_AREA_COVERED_BY_CORING_PER_YEAR</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<aux font_size="14pt" x="1522.19" y="2539.22" name="EXPECTED DESIRED SHIPS COMMITTED TO CORING IN TWO YEARS"/>
+				<connector uid="615" angle="90">
+					<from>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</from>
+					<to>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="616" angle="157.829">
+					<from>MAXIMUM_NUMBER_OF_CORING_CAMPAIGNS_PER_SHIP_PER_YEAR</from>
+					<to>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="617" angle="151.361">
+					<from>AREA_CONCLUDED_PER_CORING_CAMPAIGN</from>
+					<to>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<aux font_size="14pt" label_side="bottom" x="2146.85" y="2734.08" name="EXPECTED DESIRED AREA COVERED BY EIA IN TWO YEARS"/>
+				<aux font_size="14pt" x="2149.35" y="2655.54" name="EXPECTED DESIRED SHIPS COMMITTED TO EIA IN TWO YEARS"/>
+				<connector uid="620" angle="88.1768">
+					<from>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</from>
+					<to>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="621" angle="163.883">
+					<from>EIA_AREA_AMPLIFIER</from>
+					<to>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="622" angle="160.576">
+					<from>DESIRED_SHARE_OF_TOTAL_EIA_AREA_COVERED_BY_EIA_PER_YEAR</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="623" angle="74.3401">
+					<from>AREA_WITH_CONFIRMED_ORE</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="624" angle="90.8506">
+					<from>EIA_RATE</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="628" angle="339.013">
+					<from>&quot;HI-RES_SURVEY_SHIP_KM2/YEAR&quot;</from>
+					<to>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<aux font_size="14pt" x="2059.04" y="932.369" width="166.333" height="166.333" name="AGRESSIVE POLICY SWITCH"/>
+				<connector uid="629" angle="235.841">
+					<from>AGRESSIVE_POLICY_SWITCH</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="630" angle="45.1879">
+					<from>&quot;EXPECTED_DESIRED_SHIPS_FOR_HI-RES_IN_TWO_YEARS&quot;</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="631" angle="98.704">
+					<from>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_CORING_IN_TWO_YEARS</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="632" angle="138.881">
+					<from>EXPECTED_DESIRED_SHIPS_COMMITTED_TO_EIA_IN_TWO_YEARS</from>
+					<to>&quot;TOTAL_DESIRED_SHIPS_FOR_HI-RES,_CORING_AND_EIA&quot;</to>
+				</connector>
+				<connector uid="638" angle="117.519">
+					<from>REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME</from>
+					<to>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<connector uid="639" angle="87.0841">
+					<from>&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="640" angle="59.5516">
+					<from>CORING_WITH_DESIRABLE_OUTCOME</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="643" angle="87.2958">
+					<from>REGIONAL_SURVEY_RATE</from>
+					<to>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<connector uid="644" angle="90.9992">
+					<from>EXPECTED_PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>&quot;EXPECTED_DESIRED_AREA_COVERED_BY_HI-RES_IN_TWO_YEARS&quot;</to>
+				</connector>
+				<connector uid="645" angle="64.8271">
+					<from>&quot;HI-RES_SURVEY_RATE&quot;</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="646" angle="50.5382">
+					<from>&quot;EXPECTED_PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_CORING_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="647" angle="26.6307">
+					<from>EXPECTED_PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="648" angle="42.6474">
+					<from>CORING_RATE</from>
+					<to>EXPECTED_DESIRED_AREA_COVERED_BY_EIA_IN_TWO_YEARS</to>
+				</connector>
+				<aux font_size="14pt" x="3407.01" y="3640.42" name="EXPECTED DESIRED PRODUCTION IN ONE YEAR"/>
+				<aux font_size="14pt" x="3647.25" y="3641.25" name="EXPECTED DESIRED PRODUCTION IN TWO YEARS"/>
+				<aux font_size="14pt" x="3895.65" y="3640.42" name="EXPECTED DESIRED\nPRODUCTION IN THREE YEARS"/>
+				<connector uid="664" angle="316.646">
+					<from>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;</from>
+					<to>EXPECTED_DESIRED_PRODUCTION_IN_THREE_YEARS</to>
+				</connector>
+				<connector uid="665" angle="291.051">
+					<from>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;</from>
+					<to>EXPECTED_DESIRED_PRODUCTION_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="666" angle="255.129">
+					<from>&quot;DESIRED_PRODUCTION/COMMERCIAL_MINERAL_STOCK&quot;</from>
+					<to>EXPECTED_DESIRED_PRODUCTION_IN_ONE_YEAR</to>
+				</connector>
+				<connector uid="667" angle="324.053">
+					<from>COMMERCIAL_MINERAL_STOCK</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR</to>
+				</connector>
+				<connector uid="668" angle="336.478">
+					<from>COMMERCIAL_ORE_DISCOVERY</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR</to>
+				</connector>
+				<connector uid="669" angle="293.534">
+					<from>EXTRACTION_FROM_COMMERCIAL_MINERAL_STOCK</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR</to>
+				</connector>
+				<aux font_size="14pt" x="3402.17" y="3559.22" name="EXPECTED COMMERCIAL MINERAL\nSTOCK IN ONE YEAR"/>
+				<aux font_size="14pt" x="3647.25" y="3555.05" name="EXPECTED COMMERCIAL MINERAL\nSTOCK IN TWO YEARS"/>
+				<aux font_size="14pt" x="3895.84" y="3554.22" name="EXPECTED COMMERCIAL MINERAL\nSTOCK IN THREE YEARS"/>
+				<connector uid="670" angle="272.753">
+					<from>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR</from>
+					<to>EXPECTED_DESIRED_PRODUCTION_IN_ONE_YEAR</to>
+				</connector>
+				<connector uid="671" angle="19.5624">
+					<from>EXPECTED_DESIRED_PRODUCTION_IN_ONE_YEAR</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="672" angle="270">
+					<from>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</from>
+					<to>EXPECTED_DESIRED_PRODUCTION_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="673" angle="0.192068">
+					<from>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_THREE_YEARS</to>
+				</connector>
+				<connector uid="674" angle="19.2956">
+					<from>EXPECTED_DESIRED_PRODUCTION_IN_TWO_YEARS</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_THREE_YEARS</to>
+				</connector>
+				<connector uid="675" angle="269.874">
+					<from>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_THREE_YEARS</from>
+					<to>EXPECTED_DESIRED_PRODUCTION_IN_THREE_YEARS</to>
+				</connector>
+				<connector uid="676" angle="345.149">
+					<from>EIA_RATE</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="677" angle="348.813">
+					<from>CORING_WITH_DESIRABLE_OUTCOME</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_THREE_YEARS</to>
+				</connector>
+				<connector uid="678" angle="0.974019">
+					<from>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_ONE_YEAR</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="686" angle="303.397">
+					<from>AGRESSIVE_POLICY_SWITCH</from>
+					<to>MINING_FLEET_GAP</to>
+				</connector>
+				<aux font_size="14pt" x="3929.29" y="3353.82" name="EXPECTED DESIRED FUTURE PRODUCTION"/>
+				<connector uid="687" angle="83.3041">
+					<from>EXPECTED_DESIRED_PRODUCTION_IN_THREE_YEARS</from>
+					<to>EXPECTED_DESIRED_FUTURE_PRODUCTION</to>
+				</connector>
+				<connector uid="688" angle="0.100566">
+					<from>EXTRACTION_PER_MINING_FLEET_UNIT_PER_YEAR</from>
+					<to>EXPECTED_DESIRED_FUTURE_MINING_FLEET</to>
+				</connector>
+				<aux font_size="14pt" x="3929.29" y="3270.51" name="EXPECTED DESIRED FUTURE MINING FLEET"/>
+				<connector uid="689" angle="90">
+					<from>EXPECTED_DESIRED_FUTURE_PRODUCTION</from>
+					<to>EXPECTED_DESIRED_FUTURE_MINING_FLEET</to>
+				</connector>
+				<connector uid="690" angle="155.839">
+					<from>EXPECTED_DESIRED_FUTURE_MINING_FLEET</from>
+					<to>MINING_FLEET_GAP</to>
+				</connector>
+				<aux font_size="14pt" label_side="right" label_angle="315" x="2223.56" y="1761.1" name="TIME TO COMMIT OR RECOMMIT SHIPS"/>
+				<connector uid="694" angle="201.995">
+					<from>TIME_TO_COMMIT_OR_RECOMMIT_SHIPS</from>
+					<to>&quot;HI-RES_COMMISION_RATE&quot;</to>
+				</connector>
+				<connector uid="695" angle="232.782">
+					<from>TIME_TO_COMMIT_OR_RECOMMIT_SHIPS</from>
+					<to>CORING_COMMISION_RATE</to>
+				</connector>
+				<connector uid="696" angle="270">
+					<from>TIME_TO_COMMIT_OR_RECOMMIT_SHIPS</from>
+					<to>EIA_COMMISSION_RATE</to>
+				</connector>
+				<aux font_size="14pt" x="3177.87" y="3009.67" name="TIME TO COMMIT MINING FLEET"/>
+				<connector uid="697" angle="160.265">
+					<from>TIME_TO_COMMIT_MINING_FLEET</from>
+					<to>MINING_FLEET_COMMISSION_RATE</to>
+				</connector>
+				<connector uid="708" angle="143.793">
+					<from>COMMITTED_MINING_FLEET</from>
+					<to>COMMITTED_MINING_FLEET_SCRAPPING</to>
+				</connector>
+				<connector uid="710" angle="304.899">
+					<from>MINING_FLEET_UNDER_CONSTRUCTION</from>
+					<to>MINING_FLEET_GAP</to>
+				</connector>
+				<connector uid="468" angle="358.337">
+					<from>TOTAL_MINING_FLEET</from>
+					<to>MINING_FLEET_GAP</to>
+				</connector>
+				<connector uid="754" angle="142.756">
+					<from>TIME_TO_COMMIT_OR_RECOMMIT_SHIPS</from>
+					<to>SHIPS_DUE_FOR_REPLACEMENT</to>
+				</connector>
+				<connector uid="756" angle="157.185">
+					<from>TIME_TO_COMPLETE_DESIRED_INVESTMENT</from>
+					<to>SHIPS_DUE_FOR_REPLACEMENT</to>
+				</connector>
+				<connector uid="516" angle="14.8864">
+					<from>&quot;DESIRED_SHARE_OF_TOTAL_HI-RES_AREA_COVERED_BY_HI-RES_PER_YEAR&quot;</from>
+					<to>&quot;DESIRED_AREA_COVERED_BY_HI-RES&quot;</to>
+				</connector>
+				<aux font_size="14pt" x="2327.84" y="3521.5" width="55.5" height="55.5" name="STD SCALING FACTOR"/>
+				<connector uid="784" angle="158.688">
+					<from>STD_SCALING_FACTOR</from>
+					<to>STANDARD_DEVIATION_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="785" angle="150.418">
+					<from>STD_SCALING_FACTOR</from>
+					<to>&quot;STANDARD_DEVIATION_HI-RES_SURVEY&quot;</to>
+				</connector>
+				<connector uid="786" angle="135.311">
+					<from>STD_SCALING_FACTOR</from>
+					<to>STANDARD_DEVIATION_CORING</to>
+				</connector>
+				<connector uid="787" angle="350.3">
+					<from>STD_SCALING_FACTOR</from>
+					<to>STANDARD_DEVIATION_OCCURENCE</to>
+				</connector>
+				<connector uid="790" angle="180">
+					<from>&quot;ORE_GRADE_(MINERAL_CONCENTRATION)&quot;</from>
+					<to>PURE_MINERAL_STOCK</to>
+				</connector>
+				<connector uid="793" angle="288.269">
+					<from>PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>REGIONAL_SURVEY_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="794" angle="291.334">
+					<from>PERCENTAGE_OF_SURVEY_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_REGIONAL_SURVEY</to>
+				</connector>
+				<connector uid="795" angle="272.713">
+					<from>&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</from>
+					<to>&quot;HI-RES_SURVEY_WITH_DESIRABLE_OUTCOME&quot;</to>
+				</connector>
+				<connector uid="796" angle="251.188">
+					<from>&quot;PERCENTAGE_OF_HI-RES_SURVEY_AREA_WITH_DESIRABLE_OUTCOME&quot;</from>
+					<to>&quot;COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_HI-RES_SURVEY&quot;</to>
+				</connector>
+				<connector uid="797" angle="270.488">
+					<from>PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>CORING_WITH_DESIRABLE_OUTCOME</to>
+				</connector>
+				<connector uid="798" angle="227.722">
+					<from>PERCENTAGE_OF_CORING_AREA_WITH_DESIRABLE_OUTCOME</from>
+					<to>COMMERCIAL_POTENTIAL_DISCONFIRMATION_AFTER_CORING</to>
+				</connector>
+				<connector uid="800" angle="90.2946">
+					<from>AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</from>
+					<to>COMMERCIAL_ORE_DISCOVERY</to>
+				</connector>
+				<connector uid="804" angle="9.74407">
+					<from>EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_TWO_YEARS</to>
+				</connector>
+				<connector uid="805" angle="6.56292">
+					<from>EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY</from>
+					<to>EXPECTED_COMMERCIAL_MINERAL_STOCK_IN_THREE_YEARS</to>
+				</connector>
+				<aux x="3276.25" y="2026.25" name="SURVEY CAPEX"/>
+				<aux x="3287.5" y="2130.83" name="SURVEY OPEX"/>
+				<connector uid="809" angle="351.71">
+					<from>&quot;HI-RES,_CORING,_EIA_CAPEX&quot;</from>
+					<to>SURVEY_CAPEX</to>
+				</connector>
+				<connector uid="810" angle="215.311">
+					<from>REGIONAL_SURVEY_CAPEX</from>
+					<to>SURVEY_CAPEX</to>
+				</connector>
+				<connector uid="811" angle="226.848">
+					<from>REGIONAL_SURVEY_OPEX</from>
+					<to>SURVEY_OPEX</to>
+				</connector>
+				<connector uid="812" angle="31.5407">
+					<from>&quot;HI-RES,_CORING,_EIA_OPEX&quot;</from>
+					<to>SURVEY_OPEX</to>
+				</connector>
+				<stock x="4235" y="3178.75" name="TOTAL EXTRACTION"/>
+				<flow x="4123.13" y="3183.75" name="EXTRACTION RATE">
+					<pts>
+						<pt x="4033.75" y="3183.75"/>
+						<pt x="4212.5" y="3183.75"/>
+					</pts>
+				</flow>
+				<connector uid="813" angle="21.199">
+					<from>&quot;COPPER,_ZINC,_COBALT_MIX_EXTRACTION&quot;</from>
+					<to>EXTRACTION_RATE</to>
+				</connector>
+				<aux x="4163.75" y="2853.33" name="NET VALUE"/>
+				<connector uid="817" angle="261.631">
+					<from>MINING_REVENUE</from>
+					<to>NET_VALUE</to>
+				</connector>
+				<connector uid="818" angle="332.872">
+					<from>TOTAL_OPEX</from>
+					<to>NET_VALUE</to>
+				</connector>
+				<connector uid="819" angle="330.18">
+					<from>TOTAL_CAPEX</from>
+					<to>NET_VALUE</to>
+				</connector>
+				<stacked_container uid="823" x="4293.75" y="2309.25">
+					<table width="350" height="250" comparative="true">
+						<item type="time"/>
+						<item>
+							<entity name="SURVEY_CAPEX"/>
+						</item>
+						<item>
+							<entity name="SURVEY_OPEX"/>
+						</item>
+						<item>
+							<entity name="MINING_CAPEX"/>
+						</item>
+						<item>
+							<entity name="MINING_OPEX"/>
+						</item>
+						<item>
+							<entity name="TOTAL_EXTRACTION"/>
+						</item>
+						<item>
+							<entity name="MINING_REVENUE"/>
+						</item>
+						<item>
+							<entity name="NET_VALUE"/>
+						</item>
+						<item>
+							<entity name="DISCOUNTED_PROFITS"/>
+						</item>
+					</table>
+				</stacked_container>
+				<stacked_container uid="835" x="2993.87" y="3981.67">
+					<graph width="350" height="250" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name="EXPECTED_AVERAGE_MILLION_TONS_ORE_PER_KM2_PER_DISCOVERY"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="837" x="2526.25" y="1170.86" width="582.5" height="406.25">
+					<graph font_weight="bold" font_size="16pt" axis_title_font_weight="bold" axis_title_font_size="16pt" axis_label_font_weight="bold" axis_label_font_size="18pt" width="582.5" height="406.25" comparative="true" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name='"TOTAL_SHIPS_FOR_HI-RES,_CORING_AND_EIA"'/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="839" x="3121" y="1170.86" width="585.25" height="406.25">
+					<graph font_weight="bold" font_size="16pt" axis_title_font_weight="bold" axis_title_font_size="16pt" axis_label_font_weight="bold" axis_label_font_size="16pt" width="585.25" height="406.25" comparative="true" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name="TOTAL_MINING_FLEET"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<connector uid="840" angle="174.312">
+					<from>SHIPS_COMMITTED_TO_REGIONAL_SURVEY_SCRAPPING</from>
+					<to>REGIONAL_SURVEY_BUILD_ORDER_RATE</to>
+				</connector>
+				<stacked_container uid="842" x="4565" y="2719.33">
+					<graph width="350" height="250" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name="DISCOUNTED_PROFITS"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="843" x="2744" y="1788.75">
+					<graph width="350" height="250" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name="CORING_OPEX"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" isee:keep_zero_visible="true" pen_width="1" index="1" show_y_axis="true">
+							<entity name='"HI-RES_OPEX"'/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="844" x="2605" y="2320.96">
+					<graph width="350" height="250" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name="SHIPS_COMMITTED_TO_CORING"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" isee:keep_zero_visible="true" pen_width="1" index="1" show_y_axis="true">
+							<entity name='"SHIPS_COMMITTED_TO_HI-RES"'/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<alias color="blue" background="white" font_style="italic" font_size="14pt" uid="434" x="1596" y="1175.67" width="18" height="18">
+					<shape type="circle" radius="18"/>
+					<of>INITIAL_AVAILABLE_SHIPS</of>
+				</alias>
+			</view>
+		</views>
+	</model>
+</xmile>
+
